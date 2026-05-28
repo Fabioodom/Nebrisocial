@@ -1,0 +1,226 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   NODAL — Design System
+   Fase A: Tokens CSS semánticos (primitivos, tipografía, espaciado, radio)
+   Extraído de home.templ y node_detail.templ según frontend_master_plan.md
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── RESET ─────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── TOKENS PRIMITIVOS — COLOR ──────────────────────────────────────────── */
+:root {
+    /* Backgrounds */
+    --bg-base:          #0a0a0a;
+    --bg-surface:       #121212;
+    --bg-surface-hover: #1e1e1e;
+    --bg-elevated:      #1a1a1a;
+    --bg-overlay:       rgba(0, 0, 0, 0.5);
+
+    /* Borders */
+    --border-subtle:    rgba(255, 255, 255, 0.08);
+    --border-default:   rgba(255, 255, 255, 0.08);
+    --border-active:    rgba(124, 58, 237, 0.35);
+    --border-node:      rgba(255, 255, 255, 0.08);
+
+    /* Texto */
+    --text-primary:     #ededed;
+    --text-secondary:   #a1a1aa;
+    --text-muted:       #71717a;
+    --text-disabled:    #3f3f46;
+
+    /* Brand (Purple) */
+    --brand-primary:    #7c3aed;   /* violet-700 */
+    --brand-accent:     #a855f7;   /* purple-500 */
+    --brand-soft:       #a78bfa;   /* violet-400 — textos, links, acentos */
+    --brand-subtle:     #c4b5fd;   /* violet-300 — badges */
+
+    /* AI / Cronista (Indigo) */
+    --ai-primary:       #6366f1;   /* indigo-500 */
+    --ai-soft:          #818cf8;   /* indigo-400 */
+    --ai-subtle:        #a5b4fc;   /* indigo-300 */
+    --ai-bg:            rgba(99, 102, 241, 0.10);
+    --ai-border:        rgba(99, 102, 241, 0.30);
+
+    /* Estados */
+    --success:          #6ee7b7;   /* emerald-300 */
+    --success-bg:       rgba(110, 231, 183, 0.12);
+    --danger:           #f87171;   /* red-400 */
+    --danger-bg:        rgba(239, 68, 68, 0.12);
+    --danger-border:    rgba(239, 68, 68, 0.30);
+    --warning:          #fbbf24;   /* amber-400 */
+    --warning-bg:       rgba(251, 191, 36, 0.10);
+
+    /* Audit / Info (Blue) */
+    --info-soft:        #93c5fd;   /* blue-300 */
+    --info-bg:          rgba(96, 165, 250, 0.08);
+    --info-border:      rgba(96, 165, 250, 0.20);
+
+    /* Gradientes */
+    --gradient-brand:        linear-gradient(135deg, #7c3aed, #a855f7);
+    --gradient-title:        linear-gradient(135deg, #a78bfa, #818cf8);
+    --gradient-title-node:   linear-gradient(135deg, #e2e8f0, #a78bfa);
+    --gradient-node-header:  linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.08));
+    --gradient-greeting:     rgba(124, 58, 237, 0.10);
+}
+
+/* ── TOKENS TIPOGRÁFICOS ────────────────────────────────────────────────── */
+:root {
+    --font-sans:      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    --font-size-xs:   0.72rem;   /*  ~11.5px */
+    --font-size-sm:   0.82rem;   /*  ~13px   */
+    --font-size-base: 0.90rem;   /*  ~14.5px */
+    --font-size-md:   1.00rem;   /*  ~16px   */
+    --font-size-lg:   1.10rem;   /*  ~17.5px */
+    --font-size-xl:   1.25rem;   /*  ~20px   */
+    --font-size-2xl:  1.75rem;   /*  ~28px   */
+    --font-size-3xl:  2.50rem;   /*  ~40px   */
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+
+    --line-height-tight:  1.30;
+    --line-height-normal: 1.55;
+    --line-height-loose:  1.70;
+}
+
+/* ── TOKENS DE ESPACIADO ────────────────────────────────────────────────── */
+:root {
+    --space-1:  0.25rem;   /* 4px  */
+    --space-2:  0.50rem;   /* 8px  */
+    --space-3:  0.75rem;   /* 12px */
+    --space-4:  1.00rem;   /* 16px */
+    --space-5:  1.25rem;   /* 20px */
+    --space-6:  1.50rem;   /* 24px */
+    --space-7:  1.75rem;   /* 28px */
+    --space-8:  2.00rem;   /* 32px */
+    --space-10: 2.50rem;   /* 40px */
+    --space-12: 3.00rem;   /* 48px */
+}
+
+/* ── TOKENS DE RADIO (border-radius) ────────────────────────────────────── */
+:root {
+    --radius-sm:   6px;
+    --radius-md:   8px;
+    --radius-lg:   10px;
+    --radius-xl:   12px;
+    --radius-2xl:  14px;
+    --radius-3xl:  16px;
+    --radius-4xl:  18px;
+    --radius-pill: 99px;
+}
+
+/* ── TOKENS DE TRANSICIÓN ───────────────────────────────────────────────── */
+:root {
+    --transition-fast:   0.15s ease;
+    --transition-normal: 0.20s ease;
+    --transition-slow:   0.30s ease;
+}
+
+/* ── TOKENS DE SOMBRA ───────────────────────────────────────────────────── */
+:root {
+    --shadow-focus-brand: 0 0 0 3px rgba(124, 58, 237, 0.20);
+}
+
+/* ── TOKENS DE Z-INDEX ──────────────────────────────────────────────────── */
+:root {
+    --z-sidebar:  100;
+    --z-navbar:   200;
+    --z-modal:    300;
+    --z-tooltip:  400;
+}
+
+/* ── BASE DE DOCUMENTO ──────────────────────────────────────────────────── */
+html, body {
+    font-size: 16px;
+    height: 100%;
+    overflow: hidden; /* app-shell gestiona el scroll */
+}
+
+/* Custom scrollbars globales */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #444;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Shell de pantalla completa: columna flex que contiene navbar + body */
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ── KEYFRAMES GLOBALES ─────────────────────────────────────────────────── */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+
+@keyframes fadeInFast {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+}
+
+/* ── INDICADOR DE CARGA HTMX ────────────────────────────────────────────── */
+.htmx-indicator {
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+    display: flex;
+}
+
+.loader-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-subtle);
+    border-top-color: var(--brand-soft);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}

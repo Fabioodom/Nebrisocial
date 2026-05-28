@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	nats "github.com/nats-io/nats.go"
@@ -12,6 +13,7 @@ import (
 	"nodal/internal/handlers"
 	"nodal/internal/middleware"
 	"nodal/internal/platform/database"
+	"nodal/internal/platform/websocket"
 )
 
 func main() {
@@ -28,6 +30,10 @@ func main() {
 		log.Fatalf("CRÍTICO: No se pudo conectar a PostgreSQL: %v", err)
 	}
 	defer db.Close()
+
+	// ── WebSocket Hub ────────────────────────────────────────────────────────
+	hub := websocket.NewHub()
+	go hub.Run()
 
 	// ── Conexión NATS ────────────────────────────────────────────────────────
 	// NATS_URL puede dejarse vacía para entornos sin NATS (el handler lo tolera).
@@ -55,7 +61,11 @@ func main() {
 	// ── Router ───────────────────────────────────────────────────────────────
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", handlers.HomeHandler)
+	// Archivos estáticos (CSS, JS, imágenes) — Design System Fase A
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+
+	// Home — ahora recibe db para listar nodos
+	mux.HandleFunc("/", handlers.HomeHandler(db))
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		if err := db.Ping(); err != nil {
@@ -87,13 +97,30 @@ func main() {
 	mux.HandleFunc("/auth/github/login", authHandler.GitHubLogin)
 	mux.HandleFunc("/auth/github/callback", authHandler.GitHubCallback)
 
-	// ── Rutas protegidas (API) ────────────────────────────────────────────────
-	// /nodes protegido con RequireAuth (Bearer token en header Authorization).
-	// Las peticiones HTMX desde la home ya llevan la cookie de sesión, que el
-	// middleware puede leer; para clientes API se usa el header Bearer.
+	// ── Rutas de Nodos ────────────────────────────────────────────────────────
+	// POST /nodes — crear un nodo (protegido por RequireAuth)
 	mux.Handle("/nodes", middleware.RequireAuth(
 		http.HandlerFunc(handlers.CreateNodeHandler(db, nc)),
 	))
+
+	// GET /nodes/{id} — ver el detalle de un nodo (público)
+	// POST /nodes/{id}/chat — enviar un mensaje de chat (público para pruebas)
+	// GET /nodes/{id}/ws — WebSocket de tiempo real
+	mux.HandleFunc("/nodes/", func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/ws") {
+			handlers.WebSocketHandler(hub)(w, r)
+			return
+		}
+		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/chat") {
+			handlers.PostChatMessageHandler(db, nc, hub)(w, r)
+			return
+		}
+		// Para cualquier otro método/path bajo /nodes/, servir el detalle
+		handlers.NodeDetailHandler(db)(w, r)
+	})
+
+	// ── Rutas de Administración / Auditoría ──────────────────────────────────
+	mux.HandleFunc("/admin/audit", handlers.AuditHandler(db))
 
 	// ── Arranque ─────────────────────────────────────────────────────────────
 	port := os.Getenv("PORT")

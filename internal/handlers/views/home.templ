@@ -1,192 +1,19 @@
 package views
 
-// Layout es el layout base compartido por todas las páginas de Nodal.
-// Incluye htmx, estilos globales y estilos de auth.
-templ Layout() {
-    <html lang="es">
-        <head>
-            <meta charset="UTF-8"/>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-            <title>Nodal</title>
-            <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-            <style>
-                *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+import (
+	"nodal/internal/platform/database"
+	"fmt"
+	"strings"
+)
 
-                body {
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                    background: #0f0f13;
-                    color: #e2e8f0;
-                    min-height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                }
-
-                .navbar {
-                    width: 100%;
-                    padding: 1rem 2rem;
-                    background: rgba(255,255,255,0.04);
-                    border-bottom: 1px solid rgba(255,255,255,0.08);
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                }
-                .navbar-brand { font-size: 1.25rem; font-weight: 700; color: #a78bfa; text-decoration: none; }
-                .navbar-actions { display: flex; gap: 0.75rem; align-items: center; }
-
-                .btn-primary {
-                    display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
-                    padding: 0.75rem 1.5rem;
-                    background: linear-gradient(135deg, #7c3aed, #a855f7);
-                    color: #fff; border: none; border-radius: 10px;
-                    font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none;
-                    transition: opacity 0.2s, transform 0.15s;
-                }
-                .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-                .btn-primary-full { width: 100%; }
-
-                .btn-secondary {
-                    padding: 0.5rem 1rem;
-                    background: rgba(255,255,255,0.07);
-                    color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);
-                    border-radius: 8px; font-size: 0.9rem; cursor: pointer;
-                    text-decoration: none; transition: background 0.2s;
-                }
-                .btn-secondary:hover { background: rgba(255,255,255,0.12); }
-
-                .btn-danger {
-                    padding: 0.5rem 1rem;
-                    background: rgba(239,68,68,0.15);
-                    color: #f87171; border: 1px solid rgba(239,68,68,0.3);
-                    border-radius: 8px; font-size: 0.9rem; cursor: pointer;
-                    transition: background 0.2s;
-                }
-                .btn-danger:hover { background: rgba(239,68,68,0.25); }
-
-                .auth-card {
-                    width: 100%; max-width: 420px;
-                    margin: 3rem auto;
-                    padding: 2.5rem;
-                    background: rgba(255,255,255,0.04);
-                    border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 18px;
-                }
-                .auth-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.4rem; }
-                .auth-subtitle { color: #94a3b8; margin-bottom: 1.75rem; }
-
-                .auth-error {
-                    background: rgba(239,68,68,0.12);
-                    border: 1px solid rgba(239,68,68,0.3);
-                    color: #f87171;
-                    padding: 0.75rem 1rem;
-                    border-radius: 8px;
-                    margin-bottom: 1rem;
-                    font-size: 0.9rem;
-                }
-
-                .auth-form { display: flex; flex-direction: column; gap: 1rem; }
-                .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-                .form-group label { font-size: 0.875rem; color: #cbd5e1; font-weight: 500; }
-                .form-group small { color: #64748b; }
-                .form-group input {
-                    padding: 0.7rem 1rem;
-                    background: rgba(255,255,255,0.06);
-                    border: 1px solid rgba(255,255,255,0.12);
-                    border-radius: 8px; color: #e2e8f0;
-                    font-size: 1rem; outline: none;
-                    transition: border-color 0.2s, box-shadow 0.2s;
-                }
-                .form-group input:focus {
-                    border-color: #7c3aed;
-                    box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
-                }
-                .form-group input::placeholder { color: #475569; }
-
-                .auth-divider {
-                    display: flex; align-items: center; gap: 0.75rem;
-                    color: #475569; font-size: 0.85rem;
-                    margin: 1.25rem 0;
-                }
-                .auth-divider::before, .auth-divider::after {
-                    content: ""; flex: 1;
-                    border-top: 1px solid rgba(255,255,255,0.08);
-                }
-
-                .oauth-buttons { display: flex; gap: 0.75rem; }
-                .btn-oauth {
-                    flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-                    padding: 0.65rem 1rem;
-                    border: 1px solid rgba(255,255,255,0.12);
-                    border-radius: 8px; font-size: 0.875rem; font-weight: 500;
-                    text-decoration: none; transition: background 0.2s;
-                }
-                .btn-google { background: rgba(234,67,53,0.1); color: #fca5a5; }
-                .btn-google:hover { background: rgba(234,67,53,0.2); }
-                .btn-github { background: rgba(255,255,255,0.06); color: #e2e8f0; }
-                .btn-github:hover { background: rgba(255,255,255,0.12); }
-
-                .auth-switch { text-align: center; font-size: 0.875rem; color: #64748b; margin-top: 1.5rem; }
-                .auth-switch a { color: #a78bfa; text-decoration: none; font-weight: 500; }
-                .auth-switch a:hover { text-decoration: underline; }
-
-                .page-content { width: 100%; max-width: 720px; padding: 2rem; }
-
-                .hero { text-align: center; padding: 3rem 0 2rem; }
-                .hero h1 {
-                    font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem;
-                    background: linear-gradient(135deg, #a78bfa, #818cf8);
-                    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-                }
-                .hero p { color: #94a3b8; font-size: 1.1rem; margin-bottom: 2rem; }
-                .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-
-                .greeting {
-                    display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
-                    padding: 1rem 1.5rem;
-                    background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.2);
-                    border-radius: 12px;
-                }
-                .greeting-text { flex: 1; }
-                .greeting-name { font-size: 1.1rem; font-weight: 600; }
-                .greeting-role { font-size: 0.825rem; color: #94a3b8; }
-
-                .card {
-                    background: rgba(255,255,255,0.04);
-                    border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem;
-                }
-                .card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
-
-                .node-form { display: flex; flex-direction: column; gap: 0.85rem; }
-                .node-form input, .node-form textarea {
-                    padding: 0.65rem 0.9rem;
-                    background: rgba(255,255,255,0.06);
-                    border: 1px solid rgba(255,255,255,0.1);
-                    border-radius: 8px; color: #e2e8f0; font-size: 0.95rem; outline: none;
-                    transition: border-color 0.2s;
-                }
-                .node-form input:focus, .node-form textarea:focus { border-color: #7c3aed; }
-                .node-form textarea { resize: vertical; min-height: 80px; }
-                #form-result { margin-top: 0.5rem; font-size: 0.875rem; color: #6ee7b7; }
-            </style>
-        </head>
-        <body>
-            <nav class="navbar">
-                <a href="/" class="navbar-brand">&#x2B21; Nodal</a>
-                <div class="navbar-actions"></div>
-            </nav>
-            { children... }
-        </body>
-    </html>
-}
-
-// Home renderiza la página principal con estado de autenticación.
-// isAuthenticated: true si hay sesión activa.
-// username: nombre del usuario autenticado (vacío si no lo está).
-templ Home(isAuthenticated bool, username string) {
+// Home renderiza la página principal con estado de autenticación y lista de nodos.
+// El contenido se centra como un Feed tipo Reddit (max-w-4xl mx-auto).
+// Delega el shell HTML completo a Layout() definido en layout.templ.
+templ Home(isAuthenticated bool, username string, nodes []database.Node) {
     @Layout() {
-        <div class="page-content">
+        <div class="feed-container">
             if isAuthenticated {
+                <!-- Saludo del usuario autenticado -->
                 <div class="greeting">
                     <div class="greeting-text">
                         <div class="greeting-name">&#128075; Hola, { username }</div>
@@ -202,26 +29,70 @@ templ Home(isAuthenticated bool, username string) {
                     </button>
                 </div>
 
-                <div class="card">
-                    <h2>Estado del Servidor</h2>
-                    <button hx-get="/health" hx-target="#health-response" hx-swap="innerHTML" class="btn-secondary">
-                        Comprobar BD
-                    </button>
-                    <div id="health-response" style="margin-top:0.75rem; color:#6ee7b7; font-size:0.875rem;"></div>
+                <!-- Formulario de creación de Nodo Estilo Reddit -->
+                <div class="create-node-box" id="create-node-box">
+                    <!-- Falso input (Colapsado por defecto) -->
+                    <div class="fake-input-box" onclick="document.getElementById('create-node-box').classList.add('expanded')">
+                        <span class="fake-input-avatar">👤</span>
+                        <div class="fake-input-placeholder">Crear nueva comunidad o hilo...</div>
+                    </div>
+
+                    <!-- Formulario Real (Oculto hasta expandirse) -->
+                    <div class="real-form-box">
+                        <div class="form-header">
+                            <h3 class="form-title">Crear nueva comunidad</h3>
+                            <button type="button" class="btn-close-compact" onclick="event.stopPropagation(); document.getElementById('create-node-box').classList.remove('expanded')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <form
+                            hx-post="/nodes"
+                            hx-target="#form-result"
+                            hx-swap="innerHTML"
+                            hx-on::after-request="if(event.detail.successful) { this.reset(); setTimeout(()=>window.location.reload(), 1200); }"
+                            class="node-form"
+                        >
+                            <div class="form-group">
+                                <label for="node-title">Nombre del Nodo</label>
+                                <input type="text" id="node-title" name="title" placeholder="p. ej. Manga & Anime" required/>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="node-category">Categoría</label>
+                                <select id="node-category" name="category">
+                                    <option value="manga">⛩️ Manga & Anime</option>
+                                    <option value="ia">🤖 IA & RAG</option>
+                                    <option value="gaming">🎮 Gaming</option>
+                                    <option value="desarrollo">🐹 Desarrollo & Diseño</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="node-description">Descripción</label>
+                                <textarea id="node-description" name="description" placeholder="¿De qué trata esta comunidad?..." rows="3"></textarea>
+                            </div>
+
+                            <div class="form-actions-row">
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('create-node-box').classList.remove('expanded')">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="btn-primary">
+                                    Crear Nodo
+                                </button>
+                            </div>
+                        </form>
+                        <div id="form-result"></div>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <h2>Crear Nuevo Nodo</h2>
-                    <form hx-post="/nodes" hx-target="#form-result" hx-swap="innerHTML" class="node-form">
-                        <input type="text" name="title" placeholder="T&#237;tulo del nodo" required/>
-                        <textarea name="description" placeholder="Descripci&#243;n del nodo..."></textarea>
-                        <button type="submit" class="btn-primary" style="width:auto; padding:0.6rem 1.25rem; margin-top:0.25rem;">
-                            Crear Nodo
-                        </button>
-                    </form>
-                    <div id="form-result"></div>
-                </div>
+                <!-- Feed de Nodos -->
+                @NodeGrid(nodes)
+
             } else {
+                <!-- Hero para usuarios no autenticados -->
                 <div class="hero">
                     <h1>Bienvenido a Nodal</h1>
                     <p>La red social basada en nodos tem&#225;ticos.<br/>&#218;nete, participa y conecta con tu comunidad.</p>
@@ -235,13 +106,56 @@ templ Home(isAuthenticated bool, username string) {
                     </div>
                 </div>
 
-                <div class="card" style="text-align:center; padding:2rem;">
-                    <button hx-get="/health" hx-target="#health-response" hx-swap="innerHTML" class="btn-secondary">
-                        Comprobar estado del servidor
-                    </button>
-                    <div id="health-response" style="margin-top:0.75rem; color:#6ee7b7; font-size:0.875rem;"></div>
-                </div>
+                <!-- Preview público de Nodos -->
+                if len(nodes) > 0 {
+                    @NodeGrid(nodes)
+                }
             }
         </div>
     }
+}
+
+// NodeGrid renderiza el grid de tarjetas de Nodos.
+// Se puede reutilizar en Home (autenticado y anónimo) y en NodeExplorer.
+templ NodeGrid(nodes []database.Node) {
+    <div class="nodes-section">
+        <div class="nodes-section-title">
+            &#9724; Nodos de la comunidad
+            if len(nodes) > 0 {
+                <span style="font-size:var(--font-size-sm); font-weight:var(--font-weight-normal); color:var(--text-muted);">
+                    ({ fmt.Sprintf("%d", len(nodes)) } nodos)
+                </span>
+            }
+        </div>
+
+        if len(nodes) == 0 {
+            <div class="nodes-empty">
+                <p>Todav&#237;a no hay nodos. &#128640;</p>
+                <p style="font-size:var(--font-size-base);">&#161;S&#233; el primero en crear uno!</p>
+            </div>
+        } else {
+            <div class="nodes-stack flex flex-col gap-0" id="nodes-grid">
+                for _, n := range nodes {
+                    @NodeCard(n)
+                }
+            </div>
+        }
+    </div>
+}
+
+// NodeCard renderiza la tarjeta de un Nodo individual dentro del grid.
+templ NodeCard(n database.Node) {
+    <a href={ templ.SafeURL("/nodes/" + n.ID) } class="node-card hover:bg-bg-surface transition-colors duration-200 p-4 border-b border-border-subtle">
+        <div class="node-card-header">
+            <span class="node-card-title">{ n.Title }</span>
+            if n.Category != "" {
+                <span class={ "node-card-category", "category-" + strings.ToLower(n.Category) }>{ n.Category }</span>
+            } else {
+                <span class="node-card-category category-general">General</span>
+            }
+        </div>
+        if n.Description != "" {
+            <div class="node-card-desc">{ n.Description }</div>
+        }
+    </a>
 }

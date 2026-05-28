@@ -1,0 +1,224 @@
+package views
+
+// Layout es el shell HTML base compartido por todas las páginas de Nodal.
+// Implementa la estructura de red social según frontend_master_plan.md §4.3:
+//   - NavBar fija arriba (100vw)
+//   - Sidebar fija a la izquierda (260px)
+//   - Área de contenido scrollable a la derecha (flex:1)
+//
+// Uso: @Layout() { <contenido de la página> }
+templ Layout() {
+    <html lang="es">
+        <head>
+            <meta charset="UTF-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            <meta name="description" content="Nodal — La red social Topic-First. Conecta con comunidades temáticas vía Nodos: chat en vivo, hilos de foro y resúmenes IA."/>
+            <title>Nodal</title>
+
+            <!-- Design System: tokens primitivos, reset, keyframes -->
+            <link rel="stylesheet" href="/static/css/design_system.css"/>
+            <!-- Components: botones, cards, chat, auth, node-cards, layout -->
+            <link rel="stylesheet" href="/static/css/components.css"/>
+
+            <!-- HTMX — interactividad sin JS framework -->
+            <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+        </head>
+        <!-- hx-boost="true": convierte <a href> en AJAX para navegación SPA-like -->
+        <body class="app-shell" hx-boost="true">
+            @NavBar()
+            <div class="app-body w-full max-w-[1600px] mx-auto">
+                @Sidebar()
+                <main class="main-content flex-1">
+                    { children... }
+                </main>
+                @Widgets()
+            </div>
+        </body>
+    </html>
+}
+
+// LayoutWithMarkdown es una variante de Layout que incluye marked.js para
+// renderizado Markdown client-side (usada en NodeDetail con resúmenes IA).
+templ LayoutWithMarkdown() {
+    <html lang="es">
+        <head>
+            <meta charset="UTF-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            <meta name="description" content="Nodal — La red social Topic-First. Conecta con comunidades temáticas vía Nodos: chat en vivo, hilos de foro y resúmenes IA."/>
+            <title>Nodal</title>
+
+            <link rel="stylesheet" href="/static/css/design_system.css"/>
+            <link rel="stylesheet" href="/static/css/components.css"/>
+
+            <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+            <!-- marked.js: renderizado Markdown client-side para resúmenes IA -->
+            <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+        </head>
+        <body class="app-shell" hx-boost="true">
+            @NavBar()
+            <div class="app-body w-full max-w-[1600px] mx-auto">
+                @Sidebar()
+                <main class="main-content flex-1">
+                    { children... }
+                </main>
+                @Widgets()
+            </div>
+        </body>
+    </html>
+}
+
+// NavBar es la barra de navegación superior de Nodal.
+// Contiene: brand (izquierda), buscador de Nodos (centro), acciones (derecha).
+templ NavBar() {
+	<nav class="navbar">
+		<!-- Brand -->
+		<a href="/" class="navbar-brand">&#x2B21; Nodal</a>
+
+		<!-- Buscador de Nodos (centro) -->
+		<div class="navbar-search">
+			<div class="navbar-search-icon">
+				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="11" cy="11" r="8"></circle>
+					<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+				</svg>
+			</div>
+			<input
+				id="navbar-node-search"
+				class="navbar-search-input"
+				type="search"
+				placeholder="Buscar Nodos..."
+				hx-get="/nodes/search"
+				hx-trigger="keyup changed delay:300ms"
+				hx-target="#node-results"
+				autocomplete="off"
+			/>
+			<kbd class="navbar-search-kbd">Ctrl K</kbd>
+		</div>
+
+		<!-- Acciones globales -->
+		<div class="navbar-actions">
+			<a href="/admin/audit" class="btn-audit-nav" title="Panel de auditoría de agentes IA">
+				&#129302; Auditoría IA
+			</a>
+		</div>
+	</nav>
+}
+
+// Sidebar es el panel lateral izquierdo de navegación de comunidades.
+// Muestra: enlace Inicio, enlace Explorar, y una lista de prueba de Mis Nodos.
+// En el futuro recibirá la lista real de nodos del usuario autenticado.
+templ Sidebar() {
+	<aside class="sidebar">
+		<!-- Menú principal -->
+		<nav class="sidebar-nav">
+			<a href="/" class="sidebar-nav-item">
+				<span class="sidebar-nav-icon">&#127968;</span>
+				Inicio
+			</a>
+			<a href="/nodes" class="sidebar-nav-item">
+				<span class="sidebar-nav-icon">&#128269;</span>
+				Explorar
+			</a>
+		</nav>
+
+		<!-- Divisor -->
+		<div class="sidebar-divider"></div>
+
+		<!-- Mis Nodos grouped by categories -->
+		<div class="sidebar-category-group">
+			<div class="sidebar-category-header">MANGA & ANIME</div>
+			<nav class="sidebar-nav-sub">
+				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
+					<span class="sidebar-node-icon">⛩️</span>
+					Manga Club
+				</a>
+			</nav>
+
+			<div class="sidebar-category-header">IA & RAG</div>
+			<nav class="sidebar-nav-sub">
+				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
+					<span class="sidebar-node-icon">🤖</span>
+					IA y Futuro
+				</a>
+				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
+					<span class="sidebar-node-icon">🧠</span>
+					Agentic RAG
+				</a>
+			</nav>
+
+			<div class="sidebar-category-header">GAMING</div>
+			<nav class="sidebar-nav-sub">
+				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
+					<span class="sidebar-node-icon">🎮</span>
+					Indie Games
+				</a>
+			</nav>
+
+			<div class="sidebar-category-header">DESARROLLO & DISEÑO</div>
+			<nav class="sidebar-nav-sub">
+				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
+					<span class="sidebar-node-icon">🐹</span>
+					Go & Backend
+				</a>
+				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
+					<span class="sidebar-node-icon">🎨</span>
+					Diseño UI/UX
+				</a>
+			</nav>
+		</div>
+
+		<!-- Footer de sidebar -->
+		<div class="sidebar-footer">
+			<span class="sidebar-footer-text">Nodal v0.1-alpha</span>
+		</div>
+	</aside>
+}
+
+// Widgets renderiza el panel de widgets de la derecha (Nodos Populares / Trending).
+templ Widgets() {
+	<aside class="widgets-sidebar hidden lg:block w-[300px] flex-shrink-0">
+		<div class="widget-box">
+			<h3 class="widget-title">🔥 Nodos Populares</h3>
+			<ul class="widget-list">
+				<li class="widget-item">
+					<a href="/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0" class="widget-link">
+						<span class="widget-icon">🤖</span>
+						<div class="widget-info">
+							<span class="widget-name">IA y Futuro</span>
+							<span class="widget-meta">1,240 miembros · 45 posts/día</span>
+						</div>
+					</a>
+				</li>
+				<li class="widget-item">
+					<a href="/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0" class="widget-link">
+						<span class="widget-icon">⛩️</span>
+						<div class="widget-info">
+							<span class="widget-name">Manga Club</span>
+							<span class="widget-meta">850 miembros · 12 posts/día</span>
+						</div>
+					</a>
+				</li>
+				<li class="widget-item">
+					<a href="/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0" class="widget-link">
+						<span class="widget-icon">🎮</span>
+						<div class="widget-info">
+							<span class="widget-name">Indie Games</span>
+							<span class="widget-meta">620 miembros · 8 posts/día</span>
+						</div>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="widget-box" style="margin-top: var(--space-6);">
+			<h3 class="widget-title">📈 Tendencias en Nodal</h3>
+			<div class="trending-tags">
+				<span class="tag-badge">#ArtificialIntelligence</span>
+				<span class="tag-badge">#GoLang</span>
+				<span class="tag-badge">#DesignSystem</span>
+				<span class="tag-badge">#Manga2026</span>
+				<span class="tag-badge">#CleanArchitecture</span>
+			</div>
+		</div>
+	</aside>
+}
