@@ -9,7 +9,6 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"fmt"
 	"nodal/internal/platform/database"
 	"sort"
 	"strings"
@@ -41,7 +40,7 @@ func buildTimeline(messages []database.ChatMessage, threads []database.Thread) [
 
 // NodeDetail renderiza la página de detalle de un Nodo con chat e hilos IA intercalados.
 // Usa LayoutWithMarkdown para incluir marked.js (renderizado de resúmenes IA).
-func NodeDetail(node *database.Node, messages []database.ChatMessage, threads []database.Thread, isAuthenticated bool) templ.Component {
+func NodeDetail(node *database.Node, messages []database.ChatMessage, threads []database.Thread, isAuthenticated bool, username string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -74,14 +73,14 @@ func NodeDetail(node *database.Node, messages []database.ChatMessage, threads []
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Cargar extensión WebSocket de HTMX --> <script src=\"https://unpkg.com/htmx.org/dist/ext/ws.js\"></script> <div class=\"node-detail-container\"><!-- Breadcrumb + Header del Nodo --><div class=\"node-detail-header\"><div class=\"breadcrumb\"><a href=\"/\">&#8592; Inicio</a> <span>/</span> <span>Nodo</span></div><div class=\"node-detail-title-row\"><h1 class=\"node-title\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Cargar extensión WebSocket de HTMX --> <script src=\"https://unpkg.com/htmx.org/dist/ext/ws.js\"></script> <div class=\"node-detail-container flex h-[calc(100vh-57px)] overflow-hidden w-full bg-bg-base\"><!-- Columna Izquierda (Chat - 70%): flex-1 flex flex-col min-w-0 bg-bg-base --><div class=\"chat-column flex-1 flex flex-col min-w-0 bg-bg-base h-full\"><!-- Header del Nodo / Canal (Estilo Discord) --><div class=\"node-detail-header p-4 border-b border-border-subtle bg-bg-base flex-shrink-0\"><div class=\"breadcrumb mb-2\"><a href=\"/\">&#8592; Inicio</a> <span>/</span> <span>Nodo</span></div><div class=\"node-detail-title-row flex items-center gap-3\"><h1 class=\"node-title\" style=\"font-size: 1.4rem; margin-bottom: 0;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(node.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 50, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 52, Col: 104}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -117,7 +116,7 @@ func NodeDetail(node *database.Node, messages []database.ChatMessage, threads []
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(node.Category)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 52, Col: 119}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 54, Col: 123}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -133,14 +132,14 @@ func NodeDetail(node *database.Node, messages []database.ChatMessage, threads []
 				return templ_7745c5c3_Err
 			}
 			if node.Description != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"node-description\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"node-description mt-2\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(node.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 56, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 58, Col: 77}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -151,142 +150,73 @@ func NodeDetail(node *database.Node, messages []database.ChatMessage, threads []
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><!-- Timeline unificado: chat + resúmenes IA (conectado vía WebSockets) --><div class=\"chat-section\" hx-ext=\"ws\" ws-connect=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><div class=\"chat-section flex-1 flex flex-col min-w-0 overflow-hidden\" hx-ext=\"ws\" ws-connect=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue("/nodes/" + node.ID + "/ws")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 61, Col: 90}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 62, Col: 139}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"><div class=\"chat-section-title\">&#128172; Timeline del Nodo <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-normal); color:var(--text-muted); margin-left:auto;\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"><!-- Timeline (#chat-messages): flex-1 overflow-y-auto p-4 space-y-4 --><div class=\"chat-timeline flex-1 overflow-y-auto p-4 space-y-4\" id=\"chat-messages\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(messages)))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 65, Col: 58}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " mensaje(s) · ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(threads)))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 65, Col: 108}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " resumen(es) IA</span></div><div class=\"chat-timeline\" id=\"chat-messages\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if len(messages) == 0 && len(threads) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"chat-empty\" id=\"chat-empty\">Sin mensajes aún. ¡Escribe el primero para activar al Agente Cronista!</div>")
+			if len(messages) == 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"chat-empty\" id=\"chat-empty\">Sin mensajes aún. ¡Escribe el primero para comenzar!</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<!-- Timeline ordenado cronológicamente (chat + IA intercalados) -->")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				for _, item := range buildTimeline(messages, threads) {
-					if item.Kind == "chat" {
-						templ_7745c5c3_Err = ChatMessageItem(item.Chat).Render(ctx, templ_7745c5c3_Buffer)
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-					} else {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<!-- Resumen IA renderizado con Markdown --> <div class=\"ai-summary-card ai-embed\"><div class=\"ai-summary-header\"><span class=\"ai-badge\">&#129302; Resumen IA</span> ")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						if item.Thread.Title != "" {
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<span class=\"ai-summary-title\">")
-							if templ_7745c5c3_Err != nil {
-								return templ_7745c5c3_Err
-							}
-							var templ_7745c5c3_Var11 string
-							templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(item.Thread.Title)
-							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 85, Col: 94}
-							}
-							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-							if templ_7745c5c3_Err != nil {
-								return templ_7745c5c3_Err
-							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span> ")
-							if templ_7745c5c3_Err != nil {
-								return templ_7745c5c3_Err
-							}
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<span class=\"ai-summary-time\">")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						var templ_7745c5c3_Var12 string
-						templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(item.Thread.CreatedAt.Format("02 Jan 15:04"))
-						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 87, Col: 116}
-						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span></div><!-- data-md almacena el Markdown crudo; JS lo renderiza en .ai-summary-body --><div class=\"ai-summary-body\" data-md=\"")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						var templ_7745c5c3_Var13 string
-						templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(item.Thread.Body)
-						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 90, Col: 91}
-						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\"></div></div>")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
+				for _, msg := range messages {
+					templ_7745c5c3_Err = ChatMessageItem(&msg).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
 					}
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div><!-- Área de input del chat (envía por HTTP POST convencional, la actualización llega por WS) --><div class=\"chat-input-area\"><form id=\"chat-form\" hx-post=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div><!-- Área de input del chat: Anclada abajo --><div class=\"chat-input-area p-4 bg-bg-base border-t border-border-subtle w-full box-border flex-shrink-0\"><form id=\"chat-form\" hx-post=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue("/nodes/" + node.ID + "/chat")
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue("/nodes/" + node.ID + "/chat")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 101, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 80, Col: 67}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-swap=\"none\" hx-on::after-request=\"\n                            if(event.detail.successful) {\n                                document.getElementById('chat-input').value='';\n                                document.getElementById('chat-counter').textContent='0/500';\n                            }\n                        \" class=\"chat-form\"><textarea id=\"chat-input\" name=\"content\" class=\"chat-textarea\" placeholder=\"Escribe un mensaje al nodo&#8230;\" maxlength=\"500\" rows=\"1\" required oninput=\"document.getElementById('chat-counter').textContent=this.value.length+'/500';\n                                     this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,80)+'px';\" onkeydown=\"if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit();}\"></textarea> <button type=\"submit\" class=\"chat-send-btn\" id=\"chat-send\" aria-label=\"Enviar mensaje\"><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"currentColor\"><path d=\"M2.01 21L23 12 2.01 3 2 10l15 2-15 2z\"></path></svg></button></form><div class=\"chat-counter\" id=\"chat-counter\">0/500</div><div class=\"cronista-hint\">&#128196; El <strong>Agente Cronista</strong> se activa al llegar a <strong>5 mensajes</strong> y genera un resumen Markdown del chat.</div></div></div></div><!-- Renderizado de Markdown y auto-scroll --> <script>\n        (function() {\n            function renderMarkdown() {\n                document.querySelectorAll('.ai-summary-body[data-md]').forEach(function(el) {\n                    if (el.dataset.rendered) return;\n                    var raw = el.getAttribute('data-md') || '';\n                    if (typeof marked !== 'undefined' && raw) {\n                        el.innerHTML = marked.parse(raw, { breaks: true, gfm: true });\n                    } else if (raw) {\n                        // Fallback: preservar saltos de línea si marked no cargó aún\n                        el.innerHTML = raw.replace(/\\n/g, '<br>');\n                    }\n                    el.dataset.rendered = '1';\n                });\n            }\n\n            // Render inicial\n            if (document.readyState === 'loading') {\n                document.addEventListener('DOMContentLoaded', renderMarkdown);\n            } else {\n                renderMarkdown();\n            }\n\n            // Re-render tras cualquier swap de HTMX (nuevas tarjetas IA vía WebSocket u oob)\n            document.addEventListener('htmx:afterSwap', renderMarkdown);\n\n            // Auto-scroll al fondo del timeline al cargar y ante cambios en el timeline\n            var msgs = document.getElementById('chat-messages');\n            if (msgs) {\n                msgs.scrollTop = msgs.scrollHeight;\n                var observer = new MutationObserver(function() {\n                    msgs.scrollTop = msgs.scrollHeight;\n                    var empty = document.getElementById('chat-empty');\n                    if (empty) empty.remove();\n                });\n                observer.observe(msgs, { childList: true });\n            }\n        })();\n        </script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-swap=\"none\" hx-on::after-request=\"\n                                if(event.detail.successful) {\n                                    document.getElementById('chat-input').value='';\n                                    document.getElementById('chat-counter').textContent='0/500';\n                                }\n                            \" class=\"chat-form w-full relative\"><textarea id=\"chat-input\" name=\"content\" class=\"chat-textarea w-full bg-bg-surface border border-border-subtle rounded-full px-6 py-3\" placeholder=\"Escribe un mensaje al nodo&#8230;\" maxlength=\"500\" rows=\"1\" required oninput=\"document.getElementById('chat-counter').textContent=this.value.length+'/500';\n                                         this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,80)+'px';\" onkeydown=\"if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit();}\"></textarea> <button type=\"submit\" class=\"chat-send-btn absolute right-4 top-1/2 -translate-y-1/2\" id=\"chat-send\" aria-label=\"Enviar mensaje\"><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"currentColor\"><path d=\"M2.01 21L23 12 2.01 3 2 10l15 2-15 2z\"></path></svg></button></form><div class=\"chat-counter text-xs text-text-muted mt-1 text-right\" id=\"chat-counter\">0/500</div></div></div></div><!-- Columna Derecha (Agente Cronista - 30%): w-80 flex-shrink-0 border-l border-border-subtle bg-bg-surface flex flex-col h-full hidden lg:flex --><aside class=\"cronista-column w-80 flex-shrink-0 border-l border-border-subtle bg-bg-surface flex flex-col h-full hidden lg:flex\"><div class=\"cronista-panel flex flex-col h-full w-full bg-bg-surface\" style=\"border: none; border-radius: 0;\"><div class=\"cronista-panel-header p-4 border-b border-border-subtle bg-bg-surface flex items-center gap-2\"><span class=\"cronista-title-icon\" style=\"display: inline-flex; align-items: center; color: var(--text-primary);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-bot\"><path d=\"M12 8V4H8\"></path><rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\"></rect><path d=\"M2 14h2\"></path><path d=\"M20 14h2\"></path><path d=\"M15 13v2\"></path><path d=\"M9 13v2\"></path></svg></span><h3 class=\"cronista-panel-title text-sm font-semibold text-text-primary\" style=\"margin: 0;\">Agente Cronista</h3></div><!-- El contenido de la IA dentro de este panel debe tener flex-1 overflow-y-auto p-4 --><div class=\"cronista-panel-body flex-1 overflow-y-auto p-4 bg-bg-surface\" id=\"cronista-threads\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if len(threads) == 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"cronista-empty\"><span class=\"cronista-empty-icon\" style=\"display: inline-flex; align-items: center; color: var(--text-muted); margin-bottom: 8px;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-book-open\"><path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z\"></path><path d=\"M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\"></path></svg></span><p>No hay resúmenes aún.</p><p class=\"text-xs text-text-muted mt-1\">Llegando a 5 mensajes se generará el primer resumen.</p></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				for _, thread := range threads {
+					templ_7745c5c3_Err = CronistaThreadItem(&thread).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div><div class=\"cronista-panel-footer p-4 border-t border-border-subtle bg-bg-surface\"><div class=\"cronista-hint-small text-xs text-text-muted flex items-start gap-1\"><span style=\"display: inline-flex; align-items: center; color: var(--text-muted); margin-top: 2px;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-sparkles\"><path d=\"m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z\"></path><path d=\"m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z\"></path><path d=\"m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z\"></path></svg></span> <span>El <strong>Agente Cronista</strong> resume automáticamente el chat cada <strong>5 mensajes</strong>.</span></div></div></div></aside></div><!-- Modal Dialog de Resumen Completo (Estilo Premium Dialog) --> <dialog id=\"ai-summary-modal\" class=\"ai-modal\"><div class=\"ai-modal-wrapper w-full\"><div class=\"ai-modal-header flex items-center justify-between p-4 border-b border-border-subtle bg-bg-surface\"><div class=\"flex items-center gap-2\"><span style=\"display: inline-flex; align-items: center; color: var(--brand-soft);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-sparkles\"><path d=\"m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z\"></path><path d=\"m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z\"></path><path d=\"m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z\"></path></svg></span><h3 id=\"ai-modal-title\" class=\"text-md font-semibold text-text-primary\" style=\"margin: 0;\">Resumen IA</h3></div><button type=\"button\" class=\"btn-close-compact text-text-muted hover:text-text-primary\" onclick=\"document.getElementById('ai-summary-modal').close()\" aria-label=\"Cerrar modal\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-x\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg></button></div><div id=\"ai-modal-content\" class=\"ai-summary-body p-6 overflow-y-auto\"><!-- Aquí se inyecta el markdown del resumen --></div></div></dialog><!-- Asegurar la carga de marked.js para transiciones HTMX / SPA-like --> <script src=\"https://cdn.jsdelivr.net/npm/marked@12/marked.min.js\"></script> <!-- Lógica de Auto-scroll, Renderizado de Markdown y Modal --> <script>\n        // Función global para abrir el modal del Agente Cronista\n        window.openAiModal = function(title, rawMd) {\n            var titleEl = document.getElementById('ai-modal-title');\n            if (titleEl) titleEl.textContent = title || 'Resumen IA';\n\n            var contentDiv = document.getElementById('ai-modal-content');\n            var modal     = document.getElementById('ai-summary-modal');\n            if (!contentDiv || !modal) return;\n\n            // ── Detectar tema actual ──────────────────────────────────────\n            var isDark = document.documentElement.getAttribute('data-theme') === 'dark';\n\n            // ── Aplicar colores directamente como inline-!important ──────\n            // (única forma 100% fiable para la Top Layer del navegador)\n            function setStyle(el, prop, val) {\n                if (el) el.style.setProperty(prop, val, 'important');\n            }\n            function clearStyle(el, prop) {\n                if (el) el.style.removeProperty(prop);\n            }\n\n            var wrapper = modal.querySelector('.ai-modal-wrapper');\n            var header  = modal.querySelector('.ai-modal-header');\n\n            if (isDark) {\n                // Dialog root\n                setStyle(modal, 'background-color', '#121212');\n                setStyle(modal, 'background',       '#121212');\n                setStyle(modal, 'color',            '#fafafa');\n                setStyle(modal, 'border-color',     '#27272a');\n                // Wrapper\n                setStyle(wrapper, 'background-color', '#121212');\n                setStyle(wrapper, 'color',            '#fafafa');\n                // Header\n                setStyle(header, 'background-color',   '#121212');\n                setStyle(header, 'color',               '#fafafa');\n                setStyle(header, 'border-bottom-color', '#27272a');\n                // Content area\n                setStyle(contentDiv, 'color', '#fafafa');\n            } else {\n                // Limpiar inline styles (dejar que el CSS normal actúe)\n                ['background-color','background','color','border-color'].forEach(function(p) { clearStyle(modal, p); });\n                ['background-color','color'].forEach(function(p) {\n                    clearStyle(wrapper, p);\n                    clearStyle(header, p);\n                });\n                clearStyle(header, 'border-bottom-color');\n                clearStyle(contentDiv, 'color');\n            }\n\n            // ── Renderizar Markdown y abrir ───────────────────────────────\n            var renderAndOpen = function() {\n                if (typeof marked !== 'undefined' && rawMd) {\n                    contentDiv.innerHTML = marked.parse(rawMd, { breaks: true, gfm: true });\n                } else {\n                    contentDiv.innerHTML = (rawMd || '').replace(/\\n/g, '<br>');\n                }\n\n                // Colorear elementos Markdown generados dinámicamente\n                if (isDark) {\n                    contentDiv.querySelectorAll('h1,h2,h3,h4,p,li,strong,em,a,span,td,th').forEach(function(el) {\n                        el.style.setProperty('color', '#fafafa', 'important');\n                    });\n                    contentDiv.querySelectorAll('h1,h2').forEach(function(el) {\n                        el.style.setProperty('border-bottom-color', '#27272a', 'important');\n                    });\n                    contentDiv.querySelectorAll('code').forEach(function(el) {\n                        el.style.setProperty('background-color', '#18181b', 'important');\n                        el.style.setProperty('color', '#a1a1aa', 'important');\n                    });\n                    contentDiv.querySelectorAll('blockquote').forEach(function(el) {\n                        el.style.setProperty('border-left-color', '#3f3f46', 'important');\n                        el.style.setProperty('color', '#a1a1aa', 'important');\n                    });\n                }\n\n                contentDiv.scrollTop = 0;\n                modal.showModal();\n            };\n\n            if (typeof marked === 'undefined') {\n                var script = document.createElement('script');\n                script.src = 'https://cdn.jsdelivr.net/npm/marked@12/marked.min.js';\n                script.onload = renderAndOpen;\n                document.head.appendChild(script);\n            } else {\n                renderAndOpen();\n            }\n        };\n\n\n        (function() {\n            var msgs = document.getElementById('chat-messages');\n            if (msgs) {\n                msgs.scrollTop = msgs.scrollHeight;\n                var observer = new MutationObserver(function() {\n                    msgs.scrollTop = msgs.scrollHeight;\n                    var empty = document.getElementById('chat-empty');\n                    if (empty) empty.remove();\n                });\n                observer.observe(msgs, { childList: true });\n            }\n        })();\n        </script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = LayoutWithMarkdown().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = LayoutWithMarkdown(isAuthenticated, username).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -311,38 +241,38 @@ func ChatMessageItem(m *database.ChatMessage) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var15 == nil {
-			templ_7745c5c3_Var15 = templ.NopComponent
+		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var10 == nil {
+			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"chat-message\" style=\"animation: fadeInFast 0.25s ease;\"><div class=\"chat-avatar\">👤</div><div class=\"chat-message-body\"><div class=\"chat-message-header\"><span class=\"chat-message-author\">Anónimo</span> <span class=\"chat-message-time\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"chat-message flex flex-row gap-3\" style=\"animation: fadeInFast 0.25s ease;\"><div class=\"chat-avatar w-10 h-10 flex-shrink-0 rounded-full bg-bg-surface border border-border-subtle flex items-center justify-center font-semibold text-text-secondary\" style=\"font-size: var(--font-size-md);\">A</div><div class=\"chat-message-body flex-1 flex flex-col min-w-0\"><div class=\"chat-message-header flex items-center gap-2\"><span class=\"chat-message-author text-sm font-semibold text-text-primary\">Anónimo</span> <span class=\"chat-message-time text-xs text-text-muted\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(m.CreatedAt.Format("15:04"))
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(m.CreatedAt.Format("15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 188, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 291, Col: 101}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</span></div><div class=\"chat-message-text\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(m.Content)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 190, Col: 54}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span></div><div class=\"chat-message-text text-text-secondary\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</div></div></div>")
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(m.Content)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 293, Col: 74}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -367,12 +297,12 @@ func ChatMessageBroadcast(m *database.ChatMessage) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var18 == nil {
-			templ_7745c5c3_Var18 = templ.NopComponent
+		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var13 == nil {
+			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div id=\"chat-messages\" hx-swap-oob=\"beforeend\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div id=\"chat-messages\" hx-swap-oob=\"beforeend\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -380,7 +310,99 @@ func ChatMessageBroadcast(m *database.ChatMessage) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// CronistaThreadItem renderiza un resumen de chat en el panel del Agente Cronista en formato teaser clicable.
+func CronistaThreadItem(t *database.Thread) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"cronista-thread-card ai-embed mb-3 cursor-pointer hover:border-brand-soft\" style=\"animation: fadeInFast 0.3s ease; cursor: pointer;\" onclick=\"openAiModal(this.dataset.title, this.dataset.md)\" data-title=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var15 string
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(t.Title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 307, Col: 225}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" data-md=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var16 string
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(t.Body)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 307, Col: 244}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"><div class=\"ai-summary-header flex items-center justify-between gap-2 mb-2\" style=\"display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-2);\"><span class=\"ai-badge flex items-center gap-1\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-sparkles\"><path d=\"m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z\"></path><path d=\"m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z\"></path><path d=\"m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z\"></path></svg> Resumen IA</span> <span class=\"ai-summary-time text-xs text-text-muted\" style=\"font-size:var(--font-size-xs); color:var(--text-muted);\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var17 string
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(t.CreatedAt.Format("02 Jan 15:04"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 313, Col: 157}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</span></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if t.Title != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<h4 class=\"cronista-thread-title\" style=\"font-size:var(--font-size-sm); font-weight:var(--font-weight-bold); color:var(--brand-subtle); margin-bottom:var(--space-1);\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var18 string
+			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(t.Title)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/node_detail.templ`, Line: 316, Col: 179}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</h4>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<p class=\"line-clamp-2 text-xs text-text-muted\" style=\"font-size: var(--font-size-xs); color: var(--text-muted); margin: 0; line-height: var(--line-height-normal);\">Haz clic para leer el resumen completo...</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

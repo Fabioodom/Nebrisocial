@@ -7,7 +7,7 @@ package views
 //   - Área de contenido scrollable a la derecha (flex:1)
 //
 // Uso: @Layout() { <contenido de la página> }
-templ Layout() {
+templ Layout(isAuthenticated bool, username string) {
     <html lang="es">
         <head>
             <meta charset="UTF-8"/>
@@ -22,13 +22,14 @@ templ Layout() {
 
             <!-- HTMX — interactividad sin JS framework -->
             <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+            @ThemeInitScript()
         </head>
         <!-- hx-boost="true": convierte <a href> en AJAX para navegación SPA-like -->
-        <body class="app-shell" hx-boost="true">
-            @NavBar()
-            <div class="app-body w-full max-w-[1600px] mx-auto">
+        <body class="app-shell overflow-x-hidden w-full" hx-boost="true">
+            @NavBar(isAuthenticated, username)
+            <div class="app-body w-full max-w-[1600px] mx-auto overflow-x-hidden">
                 @Sidebar()
-                <main class="main-content flex-1">
+                <main class="main-content flex-1 min-w-0">
                     { children... }
                 </main>
                 @Widgets()
@@ -39,7 +40,7 @@ templ Layout() {
 
 // LayoutWithMarkdown es una variante de Layout que incluye marked.js para
 // renderizado Markdown client-side (usada en NodeDetail con resúmenes IA).
-templ LayoutWithMarkdown() {
+templ LayoutWithMarkdown(isAuthenticated bool, username string) {
     <html lang="es">
         <head>
             <meta charset="UTF-8"/>
@@ -53,12 +54,13 @@ templ LayoutWithMarkdown() {
             <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
             <!-- marked.js: renderizado Markdown client-side para resúmenes IA -->
             <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+            @ThemeInitScript()
         </head>
-        <body class="app-shell" hx-boost="true">
-            @NavBar()
-            <div class="app-body w-full max-w-[1600px] mx-auto">
+        <body class="app-shell overflow-x-hidden w-full" hx-boost="true">
+            @NavBar(isAuthenticated, username)
+            <div class="app-body w-full max-w-[1600px] mx-auto overflow-x-hidden">
                 @Sidebar()
-                <main class="main-content flex-1">
+                <main class="main-content flex-1 min-w-0">
                     { children... }
                 </main>
                 @Widgets()
@@ -69,10 +71,19 @@ templ LayoutWithMarkdown() {
 
 // NavBar es la barra de navegación superior de Nodal.
 // Contiene: brand (izquierda), buscador de Nodos (centro), acciones (derecha).
-templ NavBar() {
+templ NavBar(isAuthenticated bool, username string) {
 	<nav class="navbar">
 		<!-- Brand -->
-		<a href="/" class="navbar-brand">&#x2B21; Nodal</a>
+		<div class="navbar-left">
+			<button class="navbar-hamburger md:hidden" onclick="toggleSidebar()" aria-label="Menú">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="4" y1="12" x2="20" y2="12"></line>
+					<line x1="4" y1="6" x2="20" y2="6"></line>
+					<line x1="4" y1="18" x2="20" y2="18"></line>
+				</svg>
+			</button>
+			<a href="/" class="navbar-brand">&#x2B21; Nodal</a>
+		</div>
 
 		<!-- Buscador de Nodos (centro) -->
 		<div class="navbar-search">
@@ -97,9 +108,44 @@ templ NavBar() {
 
 		<!-- Acciones globales -->
 		<div class="navbar-actions">
+			<!-- Theme Toggle Button -->
+			<button id="theme-toggle" class="btn-theme-toggle" title="Cambiar Tema" onclick="toggleTheme()">
+				<svg id="theme-toggle-dark-icon" class="hidden" fill="currentColor" viewBox="0 0 20 20" width="16" height="16">
+					<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+				</svg>
+				<svg id="theme-toggle-light-icon" class="hidden" fill="currentColor" viewBox="0 0 20 20" width="16" height="16">
+					<path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.46 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+				</svg>
+			</button>
 			<a href="/admin/audit" class="btn-audit-nav" title="Panel de auditoría de agentes IA">
 				&#129302; Auditoría IA
 			</a>
+			if isAuthenticated {
+				<div class="navbar-user flex items-center gap-2">
+					<a href="/profile" class="navbar-profile-link flex items-center gap-2 text-decoration-none">
+						<div class="navbar-avatar">
+							if username != "" {
+								{ string(username[0]) }
+							} else {
+								👤
+							}
+						</div>
+						<span class="navbar-username text-sm text-text-primary hidden sm:inline">{ "@" + username }</span>
+					</a>
+					<button class="btn-ghost-logout text-xs text-text-muted hover:text-danger"
+						style="background:transparent; border:none; cursor:pointer;"
+						hx-post="/auth/logout"
+						hx-swap="none"
+						hx-on::after-request="window.location.href='/'">
+						Cerrar sesión
+					</button>
+				</div>
+			} else {
+				<div class="navbar-auth-buttons flex gap-2">
+					<a href="/login" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: var(--font-size-sm); display: inline-flex; align-items: center; height: 36px; box-sizing: border-box;">Iniciar sesión</a>
+					<a href="/register" class="btn-primary" style="padding: 0.5rem 1rem; font-size: var(--font-size-sm); display: inline-flex; align-items: center; height: 36px; box-sizing: border-box;">Registrarse</a>
+				</div>
+			}
 		</div>
 	</nav>
 }
@@ -108,15 +154,19 @@ templ NavBar() {
 // Muestra: enlace Inicio, enlace Explorar, y una lista de prueba de Mis Nodos.
 // En el futuro recibirá la lista real de nodos del usuario autenticado.
 templ Sidebar() {
-	<aside class="sidebar">
+	<aside class="sidebar hidden md:flex">
 		<!-- Menú principal -->
 		<nav class="sidebar-nav">
 			<a href="/" class="sidebar-nav-item">
-				<span class="sidebar-nav-icon">&#127968;</span>
+				<span class="sidebar-nav-icon">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+				</span>
 				Inicio
 			</a>
 			<a href="/nodes" class="sidebar-nav-item">
-				<span class="sidebar-nav-icon">&#128269;</span>
+				<span class="sidebar-nav-icon">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+				</span>
 				Explorar
 			</a>
 		</nav>
@@ -129,7 +179,9 @@ templ Sidebar() {
 			<div class="sidebar-category-header">MANGA & ANIME</div>
 			<nav class="sidebar-nav-sub">
 				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
-					<span class="sidebar-node-icon">⛩️</span>
+					<span class="sidebar-node-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/><path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z"/><path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z"/></svg>
+					</span>
 					Manga Club
 				</a>
 			</nav>
@@ -137,11 +189,15 @@ templ Sidebar() {
 			<div class="sidebar-category-header">IA & RAG</div>
 			<nav class="sidebar-nav-sub">
 				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
-					<span class="sidebar-node-icon">🤖</span>
+					<span class="sidebar-node-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/><path d="M20 9h3"/><path d="M20 15h3"/><path d="M1 9h3"/><path d="M1 15h3"/></svg>
+					</span>
 					IA y Futuro
 				</a>
 				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
-					<span class="sidebar-node-icon">🧠</span>
+					<span class="sidebar-node-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M12 5v14"/></svg>
+					</span>
 					Agentic RAG
 				</a>
 			</nav>
@@ -149,7 +205,9 @@ templ Sidebar() {
 			<div class="sidebar-category-header">GAMING</div>
 			<nav class="sidebar-nav-sub">
 				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
-					<span class="sidebar-node-icon">🎮</span>
+					<span class="sidebar-node-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="3"/></svg>
+					</span>
 					Indie Games
 				</a>
 			</nav>
@@ -157,11 +215,15 @@ templ Sidebar() {
 			<div class="sidebar-category-header">DESARROLLO & DISEÑO</div>
 			<nav class="sidebar-nav-sub">
 				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
-					<span class="sidebar-node-icon">🐹</span>
+					<span class="sidebar-node-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+					</span>
 					Go & Backend
 				</a>
 				<a href="#" class="sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2">
-					<span class="sidebar-node-icon">🎨</span>
+					<span class="sidebar-node-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.92 0 1.63-.77 1.63-1.7 0-.43-.16-.83-.41-1.16-.08-.1-.13-.23-.13-.37 0-.28.26-.5.54-.5H16c4.42 0 8-3.58 8-8 0-4.42-3.58-8-8-8Z"/></svg>
+					</span>
 					Diseño UI/UX
 				</a>
 			</nav>
@@ -176,13 +238,20 @@ templ Sidebar() {
 
 // Widgets renderiza el panel de widgets de la derecha (Nodos Populares / Trending).
 templ Widgets() {
-	<aside class="widgets-sidebar hidden lg:block w-[300px] flex-shrink-0">
-		<div class="widget-box">
-			<h3 class="widget-title">🔥 Nodos Populares</h3>
+	<aside class="widgets-sidebar flex flex-col gap-6 w-80 flex-shrink-0 hidden lg:flex">
+		<div class="widget-box w-full">
+			<h3 class="widget-title flex items-center gap-2">
+				<span class="widget-title-icon" style="display: inline-flex; align-items: center; color: var(--text-muted);">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flame"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+				</span>
+				Nodos Populares
+			</h3>
 			<ul class="widget-list">
 				<li class="widget-item">
 					<a href="/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0" class="widget-link">
-						<span class="widget-icon">🤖</span>
+						<span class="widget-icon" style="display: inline-flex; align-items: center; color: var(--text-secondary);">
+							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-brain"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+						</span>
 						<div class="widget-info">
 							<span class="widget-name">IA y Futuro</span>
 							<span class="widget-meta">1,240 miembros · 45 posts/día</span>
@@ -191,7 +260,9 @@ templ Widgets() {
 				</li>
 				<li class="widget-item">
 					<a href="/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0" class="widget-link">
-						<span class="widget-icon">⛩️</span>
+						<span class="widget-icon" style="display: inline-flex; align-items: center; color: var(--text-secondary);">
+							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+						</span>
 						<div class="widget-info">
 							<span class="widget-name">Manga Club</span>
 							<span class="widget-meta">850 miembros · 12 posts/día</span>
@@ -200,7 +271,9 @@ templ Widgets() {
 				</li>
 				<li class="widget-item">
 					<a href="/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0" class="widget-link">
-						<span class="widget-icon">🎮</span>
+						<span class="widget-icon" style="display: inline-flex; align-items: center; color: var(--text-secondary);">
+							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gamepad-2"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="3"/></svg>
+						</span>
 						<div class="widget-info">
 							<span class="widget-name">Indie Games</span>
 							<span class="widget-meta">620 miembros · 8 posts/día</span>
@@ -210,8 +283,13 @@ templ Widgets() {
 			</ul>
 		</div>
 
-		<div class="widget-box" style="margin-top: var(--space-6);">
-			<h3 class="widget-title">📈 Tendencias en Nodal</h3>
+		<div class="widget-box w-full">
+			<h3 class="widget-title flex items-center gap-2">
+				<span class="widget-title-icon" style="display: inline-flex; align-items: center; color: var(--text-muted);">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+				</span>
+				Tendencias
+			</h3>
 			<div class="trending-tags">
 				<span class="tag-badge">#ArtificialIntelligence</span>
 				<span class="tag-badge">#GoLang</span>
@@ -221,4 +299,45 @@ templ Widgets() {
 			</div>
 		</div>
 	</aside>
+}
+
+// ThemeInitScript inicializa el tema y define las funciones globales de alternancia.
+templ ThemeInitScript() {
+	<!-- Evitar parpadeos de tema aplicando antes del renderizado -->
+	<script>
+		(function() {
+			var theme = localStorage.getItem('theme') || 'dark';
+			document.documentElement.setAttribute('data-theme', theme);
+		})();
+	</script>
+	<script>
+		function updateThemeIcons() {
+			var theme = document.documentElement.getAttribute('data-theme') || 'dark';
+			var darkIcon = document.getElementById('theme-toggle-dark-icon');
+			var lightIcon = document.getElementById('theme-toggle-light-icon');
+			if (!darkIcon || !lightIcon) return;
+			if (theme === 'dark') {
+				darkIcon.classList.add('hidden');
+				lightIcon.classList.remove('hidden');
+			} else {
+				darkIcon.classList.remove('hidden');
+				lightIcon.classList.add('hidden');
+			}
+		}
+		function toggleTheme() {
+			var currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+			var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+			document.documentElement.setAttribute('data-theme', newTheme);
+			localStorage.setItem('theme', newTheme);
+			updateThemeIcons();
+		}
+		function toggleSidebar() {
+			var sidebar = document.querySelector('.sidebar');
+			if (sidebar) {
+				sidebar.classList.toggle('mobile-open');
+			}
+		}
+		document.addEventListener('DOMContentLoaded', updateThemeIcons);
+		document.addEventListener('htmx:afterSwap', updateThemeIcons);
+	</script>
 }

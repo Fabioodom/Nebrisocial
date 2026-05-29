@@ -10,25 +10,14 @@ import (
 // El contenido se centra como un Feed tipo Reddit (max-w-4xl mx-auto).
 // Delega el shell HTML completo a Layout() definido en layout.templ.
 templ Home(isAuthenticated bool, username string, nodes []database.Node) {
-    @Layout() {
+    @Layout(isAuthenticated, username) {
         <div class="feed-container">
-            if isAuthenticated {
-                <!-- Saludo del usuario autenticado -->
-                <div class="greeting">
-                    <div class="greeting-text">
-                        <div class="greeting-name">&#128075; Hola, { username }</div>
-                        <div class="greeting-role">Miembro de Nodal</div>
-                    </div>
-                    <button
-                        class="btn-danger"
-                        hx-post="/auth/logout"
-                        hx-swap="none"
-                        hx-on::after-request="window.location.href='/'"
-                    >
-                        Cerrar sesi&#243;n
-                    </button>
-                </div>
+            <!-- Sleek Feed Header -->
+            <div class="feed-header flex justify-between items-center" style="margin-bottom: var(--space-4); border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-3);">
+                <h2 class="feed-header-title" style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--text-primary);">Feed Principal</h2>
+            </div>
 
+            if isAuthenticated {
                 <!-- Formulario de creación de Nodo Estilo Reddit -->
                 <div class="create-node-box" id="create-node-box">
                     <!-- Falso input (Colapsado por defecto) -->
@@ -87,30 +76,10 @@ templ Home(isAuthenticated bool, username string, nodes []database.Node) {
                         <div id="form-result"></div>
                     </div>
                 </div>
-
-                <!-- Feed de Nodos -->
-                @NodeGrid(nodes)
-
-            } else {
-                <!-- Hero para usuarios no autenticados -->
-                <div class="hero">
-                    <h1>Bienvenido a Nodal</h1>
-                    <p>La red social basada en nodos tem&#225;ticos.<br/>&#218;nete, participa y conecta con tu comunidad.</p>
-                    <div class="hero-actions">
-                        <a href="/register" class="btn-primary">
-                            Crear cuenta gratis
-                        </a>
-                        <a href="/login" class="btn-secondary" style="padding:0.75rem 2rem;">
-                            Iniciar sesi&#243;n
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Preview público de Nodos -->
-                if len(nodes) > 0 {
-                    @NodeGrid(nodes)
-                }
             }
+
+            <!-- Feed de Nodos -->
+            @NodeGrid(nodes)
         </div>
     }
 }
@@ -143,19 +112,60 @@ templ NodeGrid(nodes []database.Node) {
     </div>
 }
 
-// NodeCard renderiza la tarjeta de un Nodo individual dentro del grid.
+// NodeCard renderiza la tarjeta de un Nodo individual enriquecida estilo post.
 templ NodeCard(n database.Node) {
-    <a href={ templ.SafeURL("/nodes/" + n.ID) } class="node-card hover:bg-bg-surface transition-colors duration-200 p-4 border-b border-border-subtle">
-        <div class="node-card-header">
-            <span class="node-card-title">{ n.Title }</span>
+    <div class="node-card-enriched mb-4">
+        <!-- Header: Autor / Categoría -->
+        <div class="node-card-header flex items-center justify-between mb-3" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-3);">
+            <div class="flex items-center" style="display:flex; align-items:center; gap:var(--space-2);">
+                <div class="navbar-avatar" style="width:24px; height:24px; font-size:var(--font-size-xs);">
+                    { string(n.Title[0]) }
+                </div>
+                <span class="text-xs text-text-secondary font-medium" style="font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:var(--font-weight-medium);">u/CreadorAnonimo</span>
+                <span class="text-xs text-text-muted" style="font-size:var(--font-size-xs); color:var(--text-muted);">•</span>
+                <span class="text-xs text-text-muted" style="font-size:var(--font-size-xs); color:var(--text-muted);">Hace 2 horas</span>
+            </div>
             if n.Category != "" {
                 <span class={ "node-card-category", "category-" + strings.ToLower(n.Category) }>{ n.Category }</span>
             } else {
                 <span class="node-card-category category-general">General</span>
             }
         </div>
+
+        <!-- Título -->
+        <a href={ templ.SafeURL("/nodes/" + n.ID) } style="text-decoration: none;">
+            <h3 style="font-size:var(--font-size-md); font-weight:var(--font-weight-bold); color:var(--text-primary); margin-bottom:var(--space-2);">{ n.Title }</h3>
+        </a>
+
+        <!-- Descripción -->
         if n.Description != "" {
-            <div class="node-card-desc">{ n.Description }</div>
+            <p style="font-size:var(--font-size-base); color:var(--text-secondary); line-height:var(--line-height-normal); margin-bottom:var(--space-3);">{ n.Description }</p>
         }
-    </a>
+
+        <!-- Placeholder de Imagen/Multimedia -->
+        <div class="w-full h-64 bg-bg-surface rounded-md mt-3 mb-6 border border-border-subtle flex items-center justify-center text-text-secondary" style="height:256px; border:1px solid var(--border-subtle); border-radius:var(--radius-xl); background:var(--bg-surface); display:flex; align-items:center; justify-content:center; color:var(--text-secondary); margin-top:var(--space-3); margin-bottom:var(--space-6);">
+            Espacio para Imagen/Video
+        </div>
+
+        <!-- Botones de Interacción Falsos -->
+        <div class="flex items-center gap-6 mt-4 pt-3 border-t border-border-subtle/50 text-text-secondary" style="display:flex; align-items:center; gap:var(--space-6); margin-top:var(--space-4); padding-top:var(--space-3); border-top:1px solid var(--border-subtle); color:var(--text-secondary);">
+            <!-- Like -->
+            <button class="flex items-center gap-1.5 hover:text-danger transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover" style="display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                <span style="font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);">42</span>
+            </button>
+            
+            <!-- Comentar -->
+            <a href={ templ.SafeURL("/nodes/" + n.ID) } class="flex items-center gap-1.5 hover:text-brand-soft transition-colors text-decoration-none text-text-secondary p-1 rounded hover:bg-bg-surface-hover" style="display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; padding:var(--space-1); border-radius:var(--radius-sm);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span style="font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);">12</span>
+            </a>
+
+            <!-- Compartir -->
+            <button class="flex items-center gap-1.5 hover:text-brand-soft transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover" style="display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-share-2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="16.49"/><line x1="15.41" x2="8.59" y1="7.51" y2="10.49"/></svg>
+                <span style="font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);">Compartir</span>
+            </button>
+        </div>
+    </div>
 }

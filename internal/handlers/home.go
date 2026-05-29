@@ -50,3 +50,38 @@ func HomeHandler(db *sql.DB) http.HandlerFunc {
 		views.Home(isAuthenticated, username, nodes).Render(r.Context(), w)
 	}
 }
+
+// ProfileHandler renderiza la página de perfil si el usuario está autenticado.
+// En caso contrario, redirige al login.
+func ProfileHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		isAuthenticated := false
+		username := ""
+
+		if cookie, err := r.Cookie("nodal_session"); err == nil {
+			tokenStr := strings.TrimSpace(cookie.Value)
+			if claims, err := auth.ValidateToken(tokenStr); err == nil {
+				isAuthenticated = true
+				if user, err := database.FindUserByID(db, claims.UserID); err == nil {
+					username = user.Username
+				} else {
+					username = "Miembro"
+				}
+			}
+		}
+
+		if !isAuthenticated {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		views.Profile(isAuthenticated, username).Render(r.Context(), w)
+	}
+}
+

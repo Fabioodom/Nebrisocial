@@ -82,6 +82,8 @@ func main() {
 	// Vistas HTML (GET) — para el navegador
 	mux.HandleFunc("/login", authHandler.ShowLogin)
 	mux.HandleFunc("/register", authHandler.ShowRegister)
+	mux.HandleFunc("/profile", handlers.ProfileHandler(db))
+
 
 	// API de autenticación (POST)
 	mux.HandleFunc("/auth/register", authHandler.Register)

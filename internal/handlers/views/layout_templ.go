@@ -15,7 +15,7 @@ import templruntime "github.com/a-h/templ/runtime"
 //   - Área de contenido scrollable a la derecha (flex:1)
 //
 // Uso: @Layout() { <contenido de la página> }
-func Layout() templ.Component {
+func Layout(isAuthenticated bool, username string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,15 +36,23 @@ func Layout() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html lang=\"es\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"description\" content=\"Nodal — La red social Topic-First. Conecta con comunidades temáticas vía Nodos: chat en vivo, hilos de foro y resúmenes IA.\"><title>Nodal</title><!-- Design System: tokens primitivos, reset, keyframes --><link rel=\"stylesheet\" href=\"/static/css/design_system.css\"><!-- Components: botones, cards, chat, auth, node-cards, layout --><link rel=\"stylesheet\" href=\"/static/css/components.css\"><!-- HTMX — interactividad sin JS framework --><script src=\"https://unpkg.com/htmx.org@1.9.12\" defer></script></head><!-- hx-boost=\"true\": convierte <a href> en AJAX para navegación SPA-like --><body class=\"app-shell\" hx-boost=\"true\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html lang=\"es\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"description\" content=\"Nodal — La red social Topic-First. Conecta con comunidades temáticas vía Nodos: chat en vivo, hilos de foro y resúmenes IA.\"><title>Nodal</title><!-- Design System: tokens primitivos, reset, keyframes --><link rel=\"stylesheet\" href=\"/static/css/design_system.css\"><!-- Components: botones, cards, chat, auth, node-cards, layout --><link rel=\"stylesheet\" href=\"/static/css/components.css\"><!-- HTMX — interactividad sin JS framework --><script src=\"https://unpkg.com/htmx.org@1.9.12\" defer></script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NavBar().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ThemeInitScript().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"app-body w-full max-w-[1600px] mx-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</head><!-- hx-boost=\"true\": convierte <a href> en AJAX para navegación SPA-like --><body class=\"app-shell overflow-x-hidden w-full\" hx-boost=\"true\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = NavBar(isAuthenticated, username).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"app-body w-full max-w-[1600px] mx-auto overflow-x-hidden\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -52,7 +60,7 @@ func Layout() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<main class=\"main-content flex-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<main class=\"main-content flex-1 min-w-0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -60,7 +68,7 @@ func Layout() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -68,7 +76,7 @@ func Layout() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -78,7 +86,7 @@ func Layout() templ.Component {
 
 // LayoutWithMarkdown es una variante de Layout que incluye marked.js para
 // renderizado Markdown client-side (usada en NodeDetail con resúmenes IA).
-func LayoutWithMarkdown() templ.Component {
+func LayoutWithMarkdown(isAuthenticated bool, username string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -99,15 +107,23 @@ func LayoutWithMarkdown() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<html lang=\"es\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"description\" content=\"Nodal — La red social Topic-First. Conecta con comunidades temáticas vía Nodos: chat en vivo, hilos de foro y resúmenes IA.\"><title>Nodal</title><link rel=\"stylesheet\" href=\"/static/css/design_system.css\"><link rel=\"stylesheet\" href=\"/static/css/components.css\"><script src=\"https://unpkg.com/htmx.org@1.9.12\" defer></script><!-- marked.js: renderizado Markdown client-side para resúmenes IA --><script src=\"https://cdn.jsdelivr.net/npm/marked@12/marked.min.js\"></script></head><body class=\"app-shell\" hx-boost=\"true\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<html lang=\"es\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"description\" content=\"Nodal — La red social Topic-First. Conecta con comunidades temáticas vía Nodos: chat en vivo, hilos de foro y resúmenes IA.\"><title>Nodal</title><link rel=\"stylesheet\" href=\"/static/css/design_system.css\"><link rel=\"stylesheet\" href=\"/static/css/components.css\"><script src=\"https://unpkg.com/htmx.org@1.9.12\" defer></script><!-- marked.js: renderizado Markdown client-side para resúmenes IA --><script src=\"https://cdn.jsdelivr.net/npm/marked@12/marked.min.js\"></script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = NavBar().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ThemeInitScript().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"app-body w-full max-w-[1600px] mx-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</head><body class=\"app-shell overflow-x-hidden w-full\" hx-boost=\"true\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = NavBar(isAuthenticated, username).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"app-body w-full max-w-[1600px] mx-auto overflow-x-hidden\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -115,7 +131,7 @@ func LayoutWithMarkdown() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<main class=\"main-content flex-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<main class=\"main-content flex-1 min-w-0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -123,7 +139,7 @@ func LayoutWithMarkdown() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -131,7 +147,7 @@ func LayoutWithMarkdown() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -141,7 +157,7 @@ func LayoutWithMarkdown() templ.Component {
 
 // NavBar es la barra de navegación superior de Nodal.
 // Contiene: brand (izquierda), buscador de Nodos (centro), acciones (derecha).
-func NavBar() templ.Component {
+func NavBar(isAuthenticated bool, username string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -162,7 +178,55 @@ func NavBar() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<nav class=\"navbar\"><!-- Brand --><a href=\"/\" class=\"navbar-brand\">&#x2B21; Nodal</a><!-- Buscador de Nodos (centro) --><div class=\"navbar-search\"><div class=\"navbar-search-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle> <line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"></line></svg></div><input id=\"navbar-node-search\" class=\"navbar-search-input\" type=\"search\" placeholder=\"Buscar Nodos...\" hx-get=\"/nodes/search\" hx-trigger=\"keyup changed delay:300ms\" hx-target=\"#node-results\" autocomplete=\"off\"> <kbd class=\"navbar-search-kbd\">Ctrl K</kbd></div><!-- Acciones globales --><div class=\"navbar-actions\"><a href=\"/admin/audit\" class=\"btn-audit-nav\" title=\"Panel de auditoría de agentes IA\">&#129302; Auditoría IA</a></div></nav>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<nav class=\"navbar\"><!-- Brand --><div class=\"navbar-left\"><button class=\"navbar-hamburger md:hidden\" onclick=\"toggleSidebar()\" aria-label=\"Menú\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"4\" y1=\"12\" x2=\"20\" y2=\"12\"></line> <line x1=\"4\" y1=\"6\" x2=\"20\" y2=\"6\"></line> <line x1=\"4\" y1=\"18\" x2=\"20\" y2=\"18\"></line></svg></button> <a href=\"/\" class=\"navbar-brand\">&#x2B21; Nodal</a></div><!-- Buscador de Nodos (centro) --><div class=\"navbar-search\"><div class=\"navbar-search-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle> <line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"></line></svg></div><input id=\"navbar-node-search\" class=\"navbar-search-input\" type=\"search\" placeholder=\"Buscar Nodos...\" hx-get=\"/nodes/search\" hx-trigger=\"keyup changed delay:300ms\" hx-target=\"#node-results\" autocomplete=\"off\"> <kbd class=\"navbar-search-kbd\">Ctrl K</kbd></div><!-- Acciones globales --><div class=\"navbar-actions\"><!-- Theme Toggle Button --><button id=\"theme-toggle\" class=\"btn-theme-toggle\" title=\"Cambiar Tema\" onclick=\"toggleTheme()\"><svg id=\"theme-toggle-dark-icon\" class=\"hidden\" fill=\"currentColor\" viewBox=\"0 0 20 20\" width=\"16\" height=\"16\"><path d=\"M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z\"></path></svg> <svg id=\"theme-toggle-light-icon\" class=\"hidden\" fill=\"currentColor\" viewBox=\"0 0 20 20\" width=\"16\" height=\"16\"><path fill-rule=\"evenodd\" d=\"M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.46 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z\" clip-rule=\"evenodd\"></path></svg></button> <a href=\"/admin/audit\" class=\"btn-audit-nav\" title=\"Panel de auditoría de agentes IA\">&#129302; Auditoría IA</a> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if isAuthenticated {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"navbar-user flex items-center gap-2\"><a href=\"/profile\" class=\"navbar-profile-link flex items-center gap-2 text-decoration-none\"><div class=\"navbar-avatar\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if username != "" {
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(string(username[0]))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/layout.templ`, Line: 128, Col: 29}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "👤")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><span class=\"navbar-username text-sm text-text-primary hidden sm:inline\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("@" + username)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/layout.templ`, Line: 133, Col: 95}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span></a> <button class=\"btn-ghost-logout text-xs text-text-muted hover:text-danger\" style=\"background:transparent; border:none; cursor:pointer;\" hx-post=\"/auth/logout\" hx-swap=\"none\" hx-on::after-request=\"window.location.href='/'\">Cerrar sesión</button></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"navbar-auth-buttons flex gap-2\"><a href=\"/login\" class=\"btn-secondary\" style=\"padding: 0.5rem 1rem; font-size: var(--font-size-sm); display: inline-flex; align-items: center; height: 36px; box-sizing: border-box;\">Iniciar sesión</a> <a href=\"/register\" class=\"btn-primary\" style=\"padding: 0.5rem 1rem; font-size: var(--font-size-sm); display: inline-flex; align-items: center; height: 36px; box-sizing: border-box;\">Registrarse</a></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -189,12 +253,12 @@ func Sidebar() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<aside class=\"sidebar\"><!-- Menú principal --><nav class=\"sidebar-nav\"><a href=\"/\" class=\"sidebar-nav-item\"><span class=\"sidebar-nav-icon\">&#127968;</span> Inicio</a> <a href=\"/nodes\" class=\"sidebar-nav-item\"><span class=\"sidebar-nav-icon\">&#128269;</span> Explorar</a></nav><!-- Divisor --><div class=\"sidebar-divider\"></div><!-- Mis Nodos grouped by categories --><div class=\"sidebar-category-group\"><div class=\"sidebar-category-header\">MANGA & ANIME</div><nav class=\"sidebar-nav-sub\"><a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\">⛩️</span> Manga Club</a></nav><div class=\"sidebar-category-header\">IA & RAG</div><nav class=\"sidebar-nav-sub\"><a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\">🤖</span> IA y Futuro</a> <a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\">🧠</span> Agentic RAG</a></nav><div class=\"sidebar-category-header\">GAMING</div><nav class=\"sidebar-nav-sub\"><a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\">🎮</span> Indie Games</a></nav><div class=\"sidebar-category-header\">DESARROLLO & DISEÑO</div><nav class=\"sidebar-nav-sub\"><a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\">🐹</span> Go & Backend</a> <a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\">🎨</span> Diseño UI/UX</a></nav></div><!-- Footer de sidebar --><div class=\"sidebar-footer\"><span class=\"sidebar-footer-text\">Nodal v0.1-alpha</span></div></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<aside class=\"sidebar hidden md:flex\"><!-- Menú principal --><nav class=\"sidebar-nav\"><a href=\"/\" class=\"sidebar-nav-item\"><span class=\"sidebar-nav-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"></path><polyline points=\"9 22 9 12 15 12 15 22\"></polyline></svg></span> Inicio</a> <a href=\"/nodes\" class=\"sidebar-nav-item\"><span class=\"sidebar-nav-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"></line></svg></span> Explorar</a></nav><!-- Divisor --><div class=\"sidebar-divider\"></div><!-- Mis Nodos grouped by categories --><div class=\"sidebar-category-group\"><div class=\"sidebar-category-header\">MANGA & ANIME</div><nav class=\"sidebar-nav-sub\"><a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z\"></path><path d=\"m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z\"></path><path d=\"m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z\"></path></svg></span> Manga Club</a></nav><div class=\"sidebar-category-header\">IA & RAG</div><nav class=\"sidebar-nav-sub\"><a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect width=\"16\" height=\"16\" x=\"4\" y=\"4\" rx=\"2\"></rect><rect width=\"6\" height=\"6\" x=\"9\" y=\"9\" rx=\"1\"></rect><path d=\"M9 1v3\"></path><path d=\"M15 1v3\"></path><path d=\"M9 20v3\"></path><path d=\"M15 20v3\"></path><path d=\"M20 9h3\"></path><path d=\"M20 15h3\"></path><path d=\"M1 9h3\"></path><path d=\"M1 15h3\"></path></svg></span> IA y Futuro</a> <a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z\"></path><path d=\"M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z\"></path><path d=\"M12 5v14\"></path></svg></span> Agentic RAG</a></nav><div class=\"sidebar-category-header\">GAMING</div><nav class=\"sidebar-nav-sub\"><a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"6\" x2=\"10\" y1=\"12\" y2=\"12\"></line><line x1=\"8\" x2=\"8\" y1=\"10\" y2=\"14\"></line><line x1=\"15\" x2=\"15.01\" y1=\"13\" y2=\"13\"></line><line x1=\"18\" x2=\"18.01\" y1=\"11\" y2=\"11\"></line><rect width=\"20\" height=\"12\" x=\"2\" y=\"6\" rx=\"3\"></rect></svg></span> Indie Games</a></nav><div class=\"sidebar-category-header\">DESARROLLO & DISEÑO</div><nav class=\"sidebar-nav-sub\"><a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"4 17 10 11 4 5\"></polyline><line x1=\"12\" x2=\"20\" y1=\"19\" y2=\"19\"></line></svg></span> Go & Backend</a> <a href=\"#\" class=\"sidebar-node-item hover:bg-bg-surface-hover transition-colors rounded-md p-2\"><span class=\"sidebar-node-icon\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"13.5\" cy=\"6.5\" r=\".5\"></circle><circle cx=\"17.5\" cy=\"10.5\" r=\".5\"></circle><circle cx=\"8.5\" cy=\"7.5\" r=\".5\"></circle><path d=\"M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.92 0 1.63-.77 1.63-1.7 0-.43-.16-.83-.41-1.16-.08-.1-.13-.23-.13-.37 0-.28.26-.5.54-.5H16c4.42 0 8-3.58 8-8 0-4.42-3.58-8-8-8Z\"></path></svg></span> Diseño UI/UX</a></nav></div><!-- Footer de sidebar --><div class=\"sidebar-footer\"><span class=\"sidebar-footer-text\">Nodal v0.1-alpha</span></div></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -219,12 +283,42 @@ func Widgets() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<aside class=\"widgets-sidebar hidden lg:block w-[300px] flex-shrink-0\"><div class=\"widget-box\"><h3 class=\"widget-title\">🔥 Nodos Populares</h3><ul class=\"widget-list\"><li class=\"widget-item\"><a href=\"/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0\" class=\"widget-link\"><span class=\"widget-icon\">🤖</span><div class=\"widget-info\"><span class=\"widget-name\">IA y Futuro</span> <span class=\"widget-meta\">1,240 miembros · 45 posts/día</span></div></a></li><li class=\"widget-item\"><a href=\"/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0\" class=\"widget-link\"><span class=\"widget-icon\">⛩️</span><div class=\"widget-info\"><span class=\"widget-name\">Manga Club</span> <span class=\"widget-meta\">850 miembros · 12 posts/día</span></div></a></li><li class=\"widget-item\"><a href=\"/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0\" class=\"widget-link\"><span class=\"widget-icon\">🎮</span><div class=\"widget-info\"><span class=\"widget-name\">Indie Games</span> <span class=\"widget-meta\">620 miembros · 8 posts/día</span></div></a></li></ul></div><div class=\"widget-box\" style=\"margin-top: var(--space-6);\"><h3 class=\"widget-title\">📈 Tendencias en Nodal</h3><div class=\"trending-tags\"><span class=\"tag-badge\">#ArtificialIntelligence</span> <span class=\"tag-badge\">#GoLang</span> <span class=\"tag-badge\">#DesignSystem</span> <span class=\"tag-badge\">#Manga2026</span> <span class=\"tag-badge\">#CleanArchitecture</span></div></div></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<aside class=\"widgets-sidebar flex flex-col gap-6 w-80 flex-shrink-0 hidden lg:flex\"><div class=\"widget-box w-full\"><h3 class=\"widget-title flex items-center gap-2\"><span class=\"widget-title-icon\" style=\"display: inline-flex; align-items: center; color: var(--text-muted);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-flame\"><path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z\"></path></svg></span> Nodos Populares</h3><ul class=\"widget-list\"><li class=\"widget-item\"><a href=\"/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0\" class=\"widget-link\"><span class=\"widget-icon\" style=\"display: inline-flex; align-items: center; color: var(--text-secondary);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-brain\"><path d=\"M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z\"></path><path d=\"M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z\"></path></svg></span><div class=\"widget-info\"><span class=\"widget-name\">IA y Futuro</span> <span class=\"widget-meta\">1,240 miembros · 45 posts/día</span></div></a></li><li class=\"widget-item\"><a href=\"/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0\" class=\"widget-link\"><span class=\"widget-icon\" style=\"display: inline-flex; align-items: center; color: var(--text-secondary);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-book-open\"><path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z\"></path><path d=\"M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\"></path></svg></span><div class=\"widget-info\"><span class=\"widget-name\">Manga Club</span> <span class=\"widget-meta\">850 miembros · 12 posts/día</span></div></a></li><li class=\"widget-item\"><a href=\"/nodes/9ea5a528-25e7-4765-94c9-0361f638a3c0\" class=\"widget-link\"><span class=\"widget-icon\" style=\"display: inline-flex; align-items: center; color: var(--text-secondary);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-gamepad-2\"><line x1=\"6\" x2=\"10\" y1=\"12\" y2=\"12\"></line><line x1=\"8\" x2=\"8\" y1=\"10\" y2=\"14\"></line><line x1=\"15\" x2=\"15.01\" y1=\"13\" y2=\"13\"></line><line x1=\"18\" x2=\"18.01\" y1=\"11\" y2=\"11\"></line><rect width=\"20\" height=\"12\" x=\"2\" y=\"6\" rx=\"3\"></rect></svg></span><div class=\"widget-info\"><span class=\"widget-name\">Indie Games</span> <span class=\"widget-meta\">620 miembros · 8 posts/día</span></div></a></li></ul></div><div class=\"widget-box w-full\"><h3 class=\"widget-title flex items-center gap-2\"><span class=\"widget-title-icon\" style=\"display: inline-flex; align-items: center; color: var(--text-muted);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-trending-up\"><polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\"></polyline><polyline points=\"16 7 22 7 22 13\"></polyline></svg></span> Tendencias</h3><div class=\"trending-tags\"><span class=\"tag-badge\">#ArtificialIntelligence</span> <span class=\"tag-badge\">#GoLang</span> <span class=\"tag-badge\">#DesignSystem</span> <span class=\"tag-badge\">#Manga2026</span> <span class=\"tag-badge\">#CleanArchitecture</span></div></div></aside>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// ThemeInitScript inicializa el tema y define las funciones globales de alternancia.
+func ThemeInitScript() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<!-- Evitar parpadeos de tema aplicando antes del renderizado --><script>\n\t\t(function() {\n\t\t\tvar theme = localStorage.getItem('theme') || 'dark';\n\t\t\tdocument.documentElement.setAttribute('data-theme', theme);\n\t\t})();\n\t</script><script>\n\t\tfunction updateThemeIcons() {\n\t\t\tvar theme = document.documentElement.getAttribute('data-theme') || 'dark';\n\t\t\tvar darkIcon = document.getElementById('theme-toggle-dark-icon');\n\t\t\tvar lightIcon = document.getElementById('theme-toggle-light-icon');\n\t\t\tif (!darkIcon || !lightIcon) return;\n\t\t\tif (theme === 'dark') {\n\t\t\t\tdarkIcon.classList.add('hidden');\n\t\t\t\tlightIcon.classList.remove('hidden');\n\t\t\t} else {\n\t\t\t\tdarkIcon.classList.remove('hidden');\n\t\t\t\tlightIcon.classList.add('hidden');\n\t\t\t}\n\t\t}\n\t\tfunction toggleTheme() {\n\t\t\tvar currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';\n\t\t\tvar newTheme = currentTheme === 'dark' ? 'light' : 'dark';\n\t\t\tdocument.documentElement.setAttribute('data-theme', newTheme);\n\t\t\tlocalStorage.setItem('theme', newTheme);\n\t\t\tupdateThemeIcons();\n\t\t}\n\t\tfunction toggleSidebar() {\n\t\t\tvar sidebar = document.querySelector('.sidebar');\n\t\t\tif (sidebar) {\n\t\t\t\tsidebar.classList.toggle('mobile-open');\n\t\t\t}\n\t\t}\n\t\tdocument.addEventListener('DOMContentLoaded', updateThemeIcons);\n\t\tdocument.addEventListener('htmx:afterSwap', updateThemeIcons);\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -50,51 +50,31 @@ func Home(isAuthenticated bool, username string, nodes []database.Node) templ.Co
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"feed-container\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"feed-container\"><!-- Sleek Feed Header --><div class=\"feed-header flex justify-between items-center\" style=\"margin-bottom: var(--space-4); border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-3);\"><h2 class=\"feed-header-title\" style=\"font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--text-primary);\">Feed Principal</h2></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if isAuthenticated {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- Saludo del usuario autenticado --> <div class=\"greeting\"><div class=\"greeting-text\"><div class=\"greeting-name\">&#128075; Hola, ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- Formulario de creación de Nodo Estilo Reddit --> <div class=\"create-node-box\" id=\"create-node-box\"><!-- Falso input (Colapsado por defecto) --><div class=\"fake-input-box\" onclick=\"document.getElementById('create-node-box').classList.add('expanded')\"><span class=\"fake-input-avatar\">👤</span><div class=\"fake-input-placeholder\">Crear nueva comunidad o hilo...</div></div><!-- Formulario Real (Oculto hasta expandirse) --><div class=\"real-form-box\"><div class=\"form-header\"><h3 class=\"form-title\">Crear nueva comunidad</h3><button type=\"button\" class=\"btn-close-compact\" onclick=\"event.stopPropagation(); document.getElementById('create-node-box').classList.remove('expanded')\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line> <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg></button></div><form hx-post=\"/nodes\" hx-target=\"#form-result\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) { this.reset(); setTimeout(()=>window.location.reload(), 1200); }\" class=\"node-form\"><div class=\"form-group\"><label for=\"node-title\">Nombre del Nodo</label> <input type=\"text\" id=\"node-title\" name=\"title\" placeholder=\"p. ej. Manga & Anime\" required></div><div class=\"form-group\"><label for=\"node-category\">Categoría</label> <select id=\"node-category\" name=\"category\"><option value=\"manga\">⛩️ Manga & Anime</option> <option value=\"ia\">🤖 IA & RAG</option> <option value=\"gaming\">🎮 Gaming</option> <option value=\"desarrollo\">🐹 Desarrollo & Diseño</option></select></div><div class=\"form-group\"><label for=\"node-description\">Descripción</label> <textarea id=\"node-description\" name=\"description\" placeholder=\"¿De qué trata esta comunidad?...\" rows=\"3\"></textarea></div><div class=\"form-actions-row\"><button type=\"button\" class=\"btn-secondary\" onclick=\"document.getElementById('create-node-box').classList.remove('expanded')\">Cancelar</button> <button type=\"submit\" class=\"btn-primary\">Crear Nodo</button></div></form><div id=\"form-result\"></div></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var3 string
-				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(username)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 19, Col: 77}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"greeting-role\">Miembro de Nodal</div></div><button class=\"btn-danger\" hx-post=\"/auth/logout\" hx-swap=\"none\" hx-on::after-request=\"window.location.href='/'\">Cerrar sesi&#243;n</button></div><!-- Formulario de creación de Nodo Estilo Reddit --> <div class=\"create-node-box\" id=\"create-node-box\"><!-- Falso input (Colapsado por defecto) --><div class=\"fake-input-box\" onclick=\"document.getElementById('create-node-box').classList.add('expanded')\"><span class=\"fake-input-avatar\">👤</span><div class=\"fake-input-placeholder\">Crear nueva comunidad o hilo...</div></div><!-- Formulario Real (Oculto hasta expandirse) --><div class=\"real-form-box\"><div class=\"form-header\"><h3 class=\"form-title\">Crear nueva comunidad</h3><button type=\"button\" class=\"btn-close-compact\" onclick=\"event.stopPropagation(); document.getElementById('create-node-box').classList.remove('expanded')\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line> <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg></button></div><form hx-post=\"/nodes\" hx-target=\"#form-result\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) { this.reset(); setTimeout(()=>window.location.reload(), 1200); }\" class=\"node-form\"><div class=\"form-group\"><label for=\"node-title\">Nombre del Nodo</label> <input type=\"text\" id=\"node-title\" name=\"title\" placeholder=\"p. ej. Manga & Anime\" required></div><div class=\"form-group\"><label for=\"node-category\">Categoría</label> <select id=\"node-category\" name=\"category\"><option value=\"manga\">⛩️ Manga & Anime</option> <option value=\"ia\">🤖 IA & RAG</option> <option value=\"gaming\">🎮 Gaming</option> <option value=\"desarrollo\">🐹 Desarrollo & Diseño</option></select></div><div class=\"form-group\"><label for=\"node-description\">Descripción</label> <textarea id=\"node-description\" name=\"description\" placeholder=\"¿De qué trata esta comunidad?...\" rows=\"3\"></textarea></div><div class=\"form-actions-row\"><button type=\"button\" class=\"btn-secondary\" onclick=\"document.getElementById('create-node-box').classList.remove('expanded')\">Cancelar</button> <button type=\"submit\" class=\"btn-primary\">Crear Nodo</button></div></form><div id=\"form-result\"></div></div></div><!-- Feed de Nodos --> ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = NodeGrid(nodes).Render(ctx, templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Hero para usuarios no autenticados --> <div class=\"hero\"><h1>Bienvenido a Nodal</h1><p>La red social basada en nodos tem&#225;ticos.<br>&#218;nete, participa y conecta con tu comunidad.</p><div class=\"hero-actions\"><a href=\"/register\" class=\"btn-primary\">Crear cuenta gratis</a> <a href=\"/login\" class=\"btn-secondary\" style=\"padding:0.75rem 2rem;\">Iniciar sesi&#243;n</a></div></div><!-- Preview público de Nodos --> ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				if len(nodes) > 0 {
-					templ_7745c5c3_Err = NodeGrid(nodes).Render(ctx, templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- Feed de Nodos -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = NodeGrid(nodes).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Layout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Layout(isAuthenticated, username).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -120,45 +100,45 @@ func NodeGrid(nodes []database.Node) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"nodes-section\"><div class=\"nodes-section-title\">&#9724; Nodos de la comunidad ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"nodes-section\"><div class=\"nodes-section-title\">&#9724; Nodos de la comunidad ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if len(nodes) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<span style=\"font-size:var(--font-size-sm); font-weight:var(--font-weight-normal); color:var(--text-muted);\">(")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<span style=\"font-size:var(--font-size-sm); font-weight:var(--font-weight-normal); color:var(--text-muted);\">(")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(nodes)))
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(nodes)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 126, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 95, Col: 52}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " nodos)</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " nodos)</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if len(nodes) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"nodes-empty\"><p>Todav&#237;a no hay nodos. &#128640;</p><p style=\"font-size:var(--font-size-base);\">&#161;S&#233; el primero en crear uno!</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"nodes-empty\"><p>Todav&#237;a no hay nodos. &#128640;</p><p style=\"font-size:var(--font-size-base);\">&#161;S&#233; el primero en crear uno!</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"nodes-stack flex flex-col gap-0\" id=\"nodes-grid\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"nodes-stack flex flex-col gap-0\" id=\"nodes-grid\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -168,12 +148,12 @@ func NodeGrid(nodes []database.Node) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -181,7 +161,7 @@ func NodeGrid(nodes []database.Node) templ.Component {
 	})
 }
 
-// NodeCard renderiza la tarjeta de un Nodo individual dentro del grid.
+// NodeCard renderiza la tarjeta de un Nodo individual enriquecida estilo post.
 func NodeCard(n database.Node) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -198,107 +178,133 @@ func NodeCard(n database.Node) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var6 == nil {
-			templ_7745c5c3_Var6 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"node-card-enriched mb-4\"><!-- Header: Autor / Categoría --><div class=\"node-card-header flex items-center justify-between mb-3\" style=\"display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-3);\"><div class=\"flex items-center\" style=\"display:flex; align-items:center; gap:var(--space-2);\"><div class=\"navbar-avatar\" style=\"width:24px; height:24px; font-size:var(--font-size-xs);\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 templ.SafeURL
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/nodes/" + n.ID))
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(string(n.Title[0]))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 148, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 122, Col: 40}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"node-card hover:bg-bg-surface transition-colors duration-200 p-4 border-b border-border-subtle\"><div class=\"node-card-header\"><span class=\"node-card-title\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(n.Title)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 150, Col: 51}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div><span class=\"text-xs text-text-secondary font-medium\" style=\"font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:var(--font-weight-medium);\">u/CreadorAnonimo</span> <span class=\"text-xs text-text-muted\" style=\"font-size:var(--font-size-xs); color:var(--text-muted);\">•</span> <span class=\"text-xs text-text-muted\" style=\"font-size:var(--font-size-xs); color:var(--text-muted);\">Hace 2 horas</span></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if n.Category != "" {
-			var templ_7745c5c3_Var9 = []any{"node-card-category", "category-" + strings.ToLower(n.Category)}
-			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var9...)
+			var templ_7745c5c3_Var7 = []any{"node-card-category", "category-" + strings.ToLower(n.Category)}
+			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var7...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<span class=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<span class=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(templ.CSSClasses(templ_7745c5c3_Var9).String())
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(templ.CSSClasses(templ_7745c5c3_Var7).String())
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 1, Col: 0}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(n.Category)
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(n.Category)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 152, Col: 108}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 129, Col: 108}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<span class=\"node-card-category category-general\">General</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<span class=\"node-card-category category-general\">General</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div><!-- Título --><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 templ.SafeURL
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/nodes/" + n.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 136, Col: 49}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" style=\"text-decoration: none;\"><h3 style=\"font-size:var(--font-size-md); font-weight:var(--font-weight-bold); color:var(--text-primary); margin-bottom:var(--space-2);\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(n.Title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 137, Col: 158}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</h3></a><!-- Descripción -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if n.Description != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"node-card-desc\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<p style=\"font-size:var(--font-size-base); color:var(--text-secondary); line-height:var(--line-height-normal); margin-bottom:var(--space-3);\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(n.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 158, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 142, Col: 169}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<!-- Placeholder de Imagen/Multimedia --><div class=\"w-full h-64 bg-bg-surface rounded-md mt-3 mb-6 border border-border-subtle flex items-center justify-center text-text-secondary\" style=\"height:256px; border:1px solid var(--border-subtle); border-radius:var(--radius-xl); background:var(--bg-surface); display:flex; align-items:center; justify-content:center; color:var(--text-secondary); margin-top:var(--space-3); margin-bottom:var(--space-6);\">Espacio para Imagen/Video</div><!-- Botones de Interacción Falsos --><div class=\"flex items-center gap-6 mt-4 pt-3 border-t border-border-subtle/50 text-text-secondary\" style=\"display:flex; align-items:center; gap:var(--space-6); margin-top:var(--space-4); padding-top:var(--space-3); border-top:1px solid var(--border-subtle); color:var(--text-secondary);\"><!-- Like --><button class=\"flex items-center gap-1.5 hover:text-danger transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-heart\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"></path></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">42</span></button><!-- Comentar --><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var13 templ.SafeURL
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/nodes/" + n.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 159, Col: 53}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" class=\"flex items-center gap-1.5 hover:text-brand-soft transition-colors text-decoration-none text-text-secondary p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-message-square\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">12</span></a><!-- Compartir --><button class=\"flex items-center gap-1.5 hover:text-brand-soft transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-share-2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" x2=\"15.42\" y1=\"13.51\" y2=\"16.49\"></line><line x1=\"15.41\" x2=\"8.59\" y1=\"7.51\" y2=\"10.49\"></line></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">Compartir</span></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

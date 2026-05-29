@@ -1,0 +1,39 @@
+package views
+
+// Profile renderiza el esqueleto de la página de perfil con pestañas falsas.
+templ Profile(isAuthenticated bool, username string) {
+    @Layout(isAuthenticated, username) {
+        <div class="profile-container">
+            <!-- Header de Perfil -->
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    if username != "" {
+                        { string(username[0]) }
+                    } else {
+                        👤
+                    }
+                </div>
+                <div class="profile-info">
+                    <h1 class="profile-name">{ "@" + username }</h1>
+                    <p class="profile-joined">Miembro de Nodal</p>
+                </div>
+            </div>
+
+            <!-- Tabs falsas -->
+            <div class="profile-tabs">
+                <button class="profile-tab active">Mis Nodos</button>
+                <button class="profile-tab">Guardados</button>
+                <button class="profile-tab">Publicaciones</button>
+            </div>
+
+            <!-- Contenido de las tabs -->
+            <div class="profile-content">
+                <div class="profile-empty">
+                    <div class="profile-empty-icon">📂</div>
+                    <p class="profile-empty-title">No hay elementos para mostrar</p>
+                    <p class="profile-empty-subtitle">Esta sección está vacía por el momento.</p>
+                </div>
+            </div>
+        </div>
+    }
+}

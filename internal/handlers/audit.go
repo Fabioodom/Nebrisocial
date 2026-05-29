@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"strings"
 
+	"nodal/internal/auth"
 	"nodal/internal/handlers/views"
 	"nodal/internal/platform/database"
 )
@@ -26,7 +28,23 @@ func AuditHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		isAuthenticated := false
+		username := ""
+
+		if cookie, err := r.Cookie("nodal_session"); err == nil {
+			tokenStr := strings.TrimSpace(cookie.Value)
+			if claims, err := auth.ValidateToken(tokenStr); err == nil {
+				isAuthenticated = true
+				if user, err := database.FindUserByID(db, claims.UserID); err == nil {
+					username = user.Username
+				} else {
+					username = "Miembro"
+				}
+			}
+		}
+
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		views.AuditDashboard(logs).Render(r.Context(), w)
+		views.AuditDashboard(logs, isAuthenticated, username).Render(r.Context(), w)
 	}
 }
+
