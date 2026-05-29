@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -72,6 +75,10 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 		}
 
 		// ── 1. Leer y validar formulario ────────────────────────────────────────
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			log.Printf("WARN: no se pudo parsear multipart form: %v", err)
+		}
+
 		title := r.FormValue("title")
 		description := r.FormValue("description")
 		category := r.FormValue("category")
@@ -82,6 +89,41 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 
 		if category == "" {
 			category = "manga"
+		}
+
+		var imageURL *string
+		file, header, err := r.FormFile("image")
+		if err == nil {
+			defer file.Close()
+			uploadsDir := "./static/uploads"
+			if err := os.MkdirAll(uploadsDir, os.ModePerm); err != nil {
+				log.Printf("ERROR: no se pudo crear el directorio de subidas: %v", err)
+				http.Error(w, "<div class=\"error\">Error interno del servidor</div>", http.StatusInternalServerError)
+				return
+			}
+
+			ext := filepath.Ext(header.Filename)
+			newFilename := fmt.Sprintf("img-%d%s", time.Now().UnixNano(), ext)
+			filePath := filepath.Join(uploadsDir, newFilename)
+
+			out, err := os.Create(filePath)
+			if err != nil {
+				log.Printf("ERROR: no se pudo crear el archivo en disco: %v", err)
+				http.Error(w, "<div class=\"error\">Error guardando la imagen</div>", http.StatusInternalServerError)
+				return
+			}
+			defer out.Close()
+
+			if _, err := io.Copy(out, file); err != nil {
+				log.Printf("ERROR: no se pudo copiar el archivo: %v", err)
+				http.Error(w, "<div class=\"error\">Error al escribir la imagen</div>", http.StatusInternalServerError)
+				return
+			}
+
+			urlPath := "/static/uploads/" + newFilename
+			imageURL = &urlPath
+		} else if err != http.ErrMissingFile {
+			log.Printf("WARN: error al obtener el archivo image: %v", err)
 		}
 
 		// ── 2. Construir payload para el Guardián ───────────────────────────────
@@ -135,7 +177,7 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 		}
 
 		// ── 4b. Guardián aprueba (o sugiere alternativas pero permite continuar) ─
-		nodeID, err := database.CreateNode(db, title, description, category)
+		nodeID, err := database.CreateNode(db, title, description, category, imageURL)
 		if err != nil {
 			log.Printf("ERROR: no se pudo crear el nodo en BD: %v", err)
 			http.Error(w, fmt.Sprintf("<div class=\"error\">Error creando nodo: %v</div>", err), http.StatusInternalServerError)

@@ -20,6 +20,7 @@ type Node struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Category    string    `json:"category"`
+	ImageURL    *string   `json:"image_url"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 
@@ -53,14 +54,14 @@ func GenerateSlug(title string) string {
 	return result
 }
 
-// CreateNode inserts a new node into the database with slug, title, description and category.
-func CreateNode(db *sql.DB, title, description, category string) (string, error) {
+// CreateNode inserts a new node into the database with slug, title, description, category and image_url.
+func CreateNode(db *sql.DB, title, description, category string, imageURL *string) (string, error) {
 	slug := GenerateSlug(title)
 	// Añadimos RETURNING id para que PostgreSQL nos devuelva el UUID generado
-	query := `INSERT INTO nodes (slug, title, description, category) VALUES ($1, $2, $3, $4) RETURNING id`
+	query := `INSERT INTO nodes (slug, title, description, category, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING id`
 	
 	var id string
-	err := db.QueryRow(query, slug, title, description, category).Scan(&id)
+	err := db.QueryRow(query, slug, title, description, category, imageURL).Scan(&id)
 	if err != nil {
 		return "", fmt.Errorf("failed to create node: %w", err)
 	}
@@ -69,7 +70,7 @@ func CreateNode(db *sql.DB, title, description, category string) (string, error)
 
 // ListNodes retrieves all nodes ordered by creation date descending.
 func ListNodes(db *sql.DB) ([]Node, error) {
-	query := `SELECT id, title, COALESCE(description,''), COALESCE(category,''), created_at
+	query := `SELECT id, COALESCE(slug,''), title, COALESCE(description,''), COALESCE(category,''), image_url, created_at
 	          FROM nodes
 	          ORDER BY created_at DESC`
 
@@ -82,7 +83,7 @@ func ListNodes(db *sql.DB) ([]Node, error) {
 	var nodes []Node
 	for rows.Next() {
 		var n Node
-		if err := rows.Scan(&n.ID, &n.Title, &n.Description, &n.Category, &n.CreatedAt); err != nil {
+		if err := rows.Scan(&n.ID, &n.Slug, &n.Title, &n.Description, &n.Category, &n.ImageURL, &n.CreatedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan node: %w", err)
 		}
 		nodes = append(nodes, n)
@@ -92,11 +93,11 @@ func ListNodes(db *sql.DB) ([]Node, error) {
 
 // GetNodeByID retrieves a single node by its UUID.
 func GetNodeByID(db *sql.DB, id string) (*Node, error) {
-	query := `SELECT id, COALESCE(slug,''), title, COALESCE(description,''), COALESCE(category,''), created_at
+	query := `SELECT id, COALESCE(slug,''), title, COALESCE(description,''), COALESCE(category,''), image_url, created_at
 	          FROM nodes WHERE id = $1`
 
 	var n Node
-	err := db.QueryRow(query, id).Scan(&n.ID, &n.Slug, &n.Title, &n.Description, &n.Category, &n.CreatedAt)
+	err := db.QueryRow(query, id).Scan(&n.ID, &n.Slug, &n.Title, &n.Description, &n.Category, &n.ImageURL, &n.CreatedAt)
 	if err == sql.ErrNoRows {
 		return nil, fmt.Errorf("node not found")
 	}

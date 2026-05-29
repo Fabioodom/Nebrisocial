@@ -55,7 +55,7 @@ func Home(isAuthenticated bool, username string, nodes []database.Node) templ.Co
 				return templ_7745c5c3_Err
 			}
 			if isAuthenticated {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- Formulario de creación de Nodo Estilo Reddit --> <div class=\"create-node-box\" id=\"create-node-box\"><!-- Falso input (Colapsado por defecto) --><div class=\"fake-input-box\" onclick=\"document.getElementById('create-node-box').classList.add('expanded')\"><span class=\"fake-input-avatar\">👤</span><div class=\"fake-input-placeholder\">Crear nueva comunidad o hilo...</div></div><!-- Formulario Real (Oculto hasta expandirse) --><div class=\"real-form-box\"><div class=\"form-header\"><h3 class=\"form-title\">Crear nueva comunidad</h3><button type=\"button\" class=\"btn-close-compact\" onclick=\"event.stopPropagation(); document.getElementById('create-node-box').classList.remove('expanded')\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line> <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg></button></div><form hx-post=\"/nodes\" hx-target=\"#form-result\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) { this.reset(); setTimeout(()=>window.location.reload(), 1200); }\" class=\"node-form\"><div class=\"form-group\"><label for=\"node-title\">Nombre del Nodo</label> <input type=\"text\" id=\"node-title\" name=\"title\" placeholder=\"p. ej. Manga & Anime\" required></div><div class=\"form-group\"><label for=\"node-category\">Categoría</label> <select id=\"node-category\" name=\"category\"><option value=\"manga\">⛩️ Manga & Anime</option> <option value=\"ia\">🤖 IA & RAG</option> <option value=\"gaming\">🎮 Gaming</option> <option value=\"desarrollo\">🐹 Desarrollo & Diseño</option></select></div><div class=\"form-group\"><label for=\"node-description\">Descripción</label> <textarea id=\"node-description\" name=\"description\" placeholder=\"¿De qué trata esta comunidad?...\" rows=\"3\"></textarea></div><div class=\"form-actions-row\"><button type=\"button\" class=\"btn-secondary\" onclick=\"document.getElementById('create-node-box').classList.remove('expanded')\">Cancelar</button> <button type=\"submit\" class=\"btn-primary\">Crear Nodo</button></div></form><div id=\"form-result\"></div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- Formulario de creación de Nodo Estilo Reddit --> <div class=\"create-node-box\" id=\"create-node-box\"><!-- Falso input (Colapsado por defecto) --><div class=\"fake-input-box\" onclick=\"document.getElementById('create-node-box').classList.add('expanded')\"><span class=\"fake-input-avatar\">👤</span><div class=\"fake-input-placeholder\">Crear nueva comunidad o hilo...</div></div><!-- Formulario Real (Oculto hasta expandirse) --><div class=\"real-form-box\"><div class=\"form-header\"><h3 class=\"form-title\">Crear nueva comunidad</h3><button type=\"button\" class=\"btn-close-compact\" onclick=\"event.stopPropagation(); document.getElementById('create-node-box').classList.remove('expanded')\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line> <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg></button></div><form hx-post=\"/nodes\" hx-target=\"#form-result\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) { this.reset(); setTimeout(()=>window.location.reload(), 1200); }\" enctype=\"multipart/form-data\" class=\"node-form\"><div class=\"form-group\"><label for=\"node-title\">Nombre del Nodo</label> <input type=\"text\" id=\"node-title\" name=\"title\" placeholder=\"p. ej. Manga & Anime\" required></div><div class=\"form-group\"><label for=\"node-category\">Categoría</label> <select id=\"node-category\" name=\"category\"><option value=\"manga\">⛩️ Manga & Anime</option> <option value=\"ia\">🤖 IA & RAG</option> <option value=\"gaming\">🎮 Gaming</option> <option value=\"desarrollo\">🐹 Desarrollo & Diseño</option></select></div><div class=\"form-group\"><label for=\"node-description\">Descripción</label> <textarea id=\"node-description\" name=\"description\" placeholder=\"¿De qué trata esta comunidad?...\" rows=\"3\"></textarea></div><div class=\"form-group\"><label for=\"node-image\">Imagen de Portada</label> <input type=\"file\" id=\"node-image\" name=\"image\" accept=\"image/*\" class=\"w-full bg-bg-elevated border border-border-subtle rounded-md p-2 text-text-primary text-sm\"></div><div class=\"form-actions-row\"><button type=\"button\" class=\"btn-secondary\" onclick=\"document.getElementById('create-node-box').classList.remove('expanded')\">Cancelar</button> <button type=\"submit\" class=\"btn-primary\">Crear Nodo</button></div></form><div id=\"form-result\"></div></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -117,7 +117,7 @@ func NodeGrid(nodes []database.Node) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(nodes)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 95, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 101, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -190,7 +190,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(string(n.Title[0]))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 122, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 128, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -226,7 +226,7 @@ func NodeCard(n database.Node) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(n.Category)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 129, Col: 108}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 135, Col: 108}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -249,7 +249,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var10 templ.SafeURL
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/nodes/" + n.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 136, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 142, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -262,7 +262,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(n.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 137, Col: 158}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 143, Col: 158}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -280,7 +280,7 @@ func NodeCard(n database.Node) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(n.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 142, Col: 169}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 148, Col: 169}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -291,20 +291,43 @@ func NodeCard(n database.Node) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<!-- Placeholder de Imagen/Multimedia --><div class=\"w-full h-64 bg-bg-surface rounded-md mt-3 mb-6 border border-border-subtle flex items-center justify-center text-text-secondary\" style=\"height:256px; border:1px solid var(--border-subtle); border-radius:var(--radius-xl); background:var(--bg-surface); display:flex; align-items:center; justify-content:center; color:var(--text-secondary); margin-top:var(--space-3); margin-bottom:var(--space-6);\">Espacio para Imagen/Video</div><!-- Botones de Interacción Falsos --><div class=\"flex items-center gap-6 mt-4 pt-3 border-t border-border-subtle/50 text-text-secondary\" style=\"display:flex; align-items:center; gap:var(--space-6); margin-top:var(--space-4); padding-top:var(--space-3); border-top:1px solid var(--border-subtle); color:var(--text-secondary);\"><!-- Like --><button class=\"flex items-center gap-1.5 hover:text-danger transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-heart\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"></path></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">42</span></button><!-- Comentar --><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<!-- Imagen del Nodo -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var13 templ.SafeURL
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/nodes/" + n.ID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 159, Col: 53}
+		if n.ImageURL != nil && *n.ImageURL != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<img src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var13 string
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(*n.ImageURL)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 153, Col: 34}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"w-full h-64 object-cover rounded-xl mt-3 mb-6 border border-border-subtle\" alt=\"Imagen del nodo\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<!-- Botones de Interacción Falsos --><div class=\"flex items-center gap-6 mt-4 pt-3 border-t border-border-subtle/50 text-text-secondary\" style=\"display:flex; align-items:center; gap:var(--space-6); margin-top:var(--space-4); padding-top:var(--space-3); border-top:1px solid var(--border-subtle); color:var(--text-secondary);\"><!-- Like --><button class=\"flex items-center gap-1.5 hover:text-danger transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-heart\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"></path></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">42</span></button><!-- Comentar --><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" class=\"flex items-center gap-1.5 hover:text-brand-soft transition-colors text-decoration-none text-text-secondary p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-message-square\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">12</span></a><!-- Compartir --><button class=\"flex items-center gap-1.5 hover:text-brand-soft transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-share-2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" x2=\"15.42\" y1=\"13.51\" y2=\"16.49\"></line><line x1=\"15.41\" x2=\"8.59\" y1=\"7.51\" y2=\"10.49\"></line></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">Compartir</span></button></div></div>")
+		var templ_7745c5c3_Var14 templ.SafeURL
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/nodes/" + n.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 165, Col: 53}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" class=\"flex items-center gap-1.5 hover:text-brand-soft transition-colors text-decoration-none text-text-secondary p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-message-square\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">12</span></a><!-- Compartir --><button class=\"flex items-center gap-1.5 hover:text-brand-soft transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-share-2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" x2=\"15.42\" y1=\"13.51\" y2=\"16.49\"></line><line x1=\"15.41\" x2=\"8.59\" y1=\"7.51\" y2=\"10.49\"></line></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">Compartir</span></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

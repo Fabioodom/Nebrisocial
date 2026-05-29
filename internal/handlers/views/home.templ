@@ -42,6 +42,7 @@ templ Home(isAuthenticated bool, username string, nodes []database.Node) {
                             hx-target="#form-result"
                             hx-swap="innerHTML"
                             hx-on::after-request="if(event.detail.successful) { this.reset(); setTimeout(()=>window.location.reload(), 1200); }"
+                            enctype="multipart/form-data"
                             class="node-form"
                         >
                             <div class="form-group">
@@ -62,6 +63,11 @@ templ Home(isAuthenticated bool, username string, nodes []database.Node) {
                             <div class="form-group">
                                 <label for="node-description">Descripción</label>
                                 <textarea id="node-description" name="description" placeholder="¿De qué trata esta comunidad?..." rows="3"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="node-image">Imagen de Portada</label>
+                                <input type="file" id="node-image" name="image" accept="image/*" class="w-full bg-bg-elevated border border-border-subtle rounded-md p-2 text-text-primary text-sm" />
                             </div>
 
                             <div class="form-actions-row">
@@ -142,10 +148,10 @@ templ NodeCard(n database.Node) {
             <p style="font-size:var(--font-size-base); color:var(--text-secondary); line-height:var(--line-height-normal); margin-bottom:var(--space-3);">{ n.Description }</p>
         }
 
-        <!-- Placeholder de Imagen/Multimedia -->
-        <div class="w-full h-64 bg-bg-surface rounded-md mt-3 mb-6 border border-border-subtle flex items-center justify-center text-text-secondary" style="height:256px; border:1px solid var(--border-subtle); border-radius:var(--radius-xl); background:var(--bg-surface); display:flex; align-items:center; justify-content:center; color:var(--text-secondary); margin-top:var(--space-3); margin-bottom:var(--space-6);">
-            Espacio para Imagen/Video
-        </div>
+        <!-- Imagen del Nodo -->
+        if n.ImageURL != nil && *n.ImageURL != "" {
+            <img src={ *n.ImageURL } class="w-full h-64 object-cover rounded-xl mt-3 mb-6 border border-border-subtle" alt="Imagen del nodo" />
+        }
 
         <!-- Botones de Interacción Falsos -->
         <div class="flex items-center gap-6 mt-4 pt-3 border-t border-border-subtle/50 text-text-secondary" style="display:flex; align-items:center; gap:var(--space-6); margin-top:var(--space-4); padding-top:var(--space-3); border-top:1px solid var(--border-subtle); color:var(--text-secondary);">

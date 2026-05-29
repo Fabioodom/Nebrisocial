@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/joho/godotenv"
 	nats "github.com/nats-io/nats.go"
@@ -101,25 +100,18 @@ func main() {
 
 	// ── Rutas de Nodos ────────────────────────────────────────────────────────
 	// POST /nodes — crear un nodo (protegido por RequireAuth)
-	mux.Handle("/nodes", middleware.RequireAuth(
+	mux.Handle("POST /nodes", middleware.RequireAuth(
 		http.HandlerFunc(handlers.CreateNodeHandler(db, nc)),
 	))
 
 	// GET /nodes/{id} — ver el detalle de un nodo (público)
+	mux.HandleFunc("GET /nodes/{id}", handlers.NodeDetailHandler(db))
+
 	// POST /nodes/{id}/chat — enviar un mensaje de chat (público para pruebas)
+	mux.HandleFunc("POST /nodes/{id}/chat", handlers.PostChatMessageHandler(db, nc, hub))
+
 	// GET /nodes/{id}/ws — WebSocket de tiempo real
-	mux.HandleFunc("/nodes/", func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasSuffix(r.URL.Path, "/ws") {
-			handlers.WebSocketHandler(hub)(w, r)
-			return
-		}
-		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/chat") {
-			handlers.PostChatMessageHandler(db, nc, hub)(w, r)
-			return
-		}
-		// Para cualquier otro método/path bajo /nodes/, servir el detalle
-		handlers.NodeDetailHandler(db)(w, r)
-	})
+	mux.HandleFunc("GET /nodes/{id}/ws", handlers.WebSocketHandler(hub))
 
 	// ── Rutas de Administración / Auditoría ──────────────────────────────────
 	mux.HandleFunc("/admin/audit", handlers.AuditHandler(db))
