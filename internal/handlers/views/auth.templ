@@ -5,7 +5,7 @@ package views
 // Si el servidor devuelve un fragmento de error HTML, se muestra en #auth-error.
 // Si el login es exitoso, htmx recibe HX-Redirect y redirige a /.
 templ Login() {
-    @Layout() {
+    @Layout(false, "") {
         <div class="auth-card">
             <h1 class="auth-title">Iniciar Sesión</h1>
             <p class="auth-subtitle">Bienvenido de vuelta a <strong>Nodal</strong></p>
@@ -87,7 +87,7 @@ templ Login() {
 // Register renderiza la página de registro de nuevos usuarios.
 // Idéntica estrategia htmx: POST a /auth/register, errores en #auth-error.
 templ Register() {
-    @Layout() {
+    @Layout(false, "") {
         <div class="auth-card">
             <h1 class="auth-title">Crear Cuenta</h1>
             <p class="auth-subtitle">Únete a <strong>Nodal</strong> hoy</p>

@@ -1,0 +1,288 @@
+package views
+
+import (
+	"nodal/internal/platform/database"
+	"fmt"
+	"strings"
+)
+
+// agentIcon devuelve un emoji representativo por tipo de agente.
+func agentIcon(agentType string) string {
+	switch strings.ToLower(agentType) {
+	case "guardian":
+		return "🛡️"
+	case "curador", "curator":
+		return "📚"
+	case "cronista", "chronicler":
+		return "✍️"
+	case "analyzer", "analista":
+		return "🔍"
+	default:
+		return "🤖"
+	}
+}
+
+// actionBadgeClass devuelve la clase CSS para la acción del agente.
+func actionBadgeClass(action string) string {
+	switch strings.ToLower(action) {
+	case "approve", "approved":
+		return "badge-approve"
+	case "block", "blocked", "reject", "rejected":
+		return "badge-block"
+	case "suggest", "summarize", "generate":
+		return "badge-suggest"
+	default:
+		return "badge-default"
+	}
+}
+
+// AuditDashboard renderiza el dashboard de auditoría de agentes IA.
+templ AuditDashboard(logs []database.AgentAuditLog, isAuthenticated bool, username string) {
+	@Layout(isAuthenticated, username) {
+		<div class="page-content" style="max-width: 1100px;">
+			<div class="audit-header">
+				<div>
+					<h1 class="audit-title">&#129302; Auditoría IA</h1>
+					<p class="audit-subtitle">Registro de decisiones tomadas por los Agentes de Nodal</p>
+				</div>
+				<div class="audit-stats">
+					<div class="stat-pill">
+						<span class="stat-number">{ fmt.Sprintf("%d", len(logs)) }</span>
+						<span class="stat-label">registros</span>
+					</div>
+				</div>
+			</div>
+
+			if len(logs) == 0 {
+				<div class="audit-empty">
+					<div class="audit-empty-icon">&#128203;</div>
+					<p>No hay registros de auditoría aún.</p>
+					<p style="font-size:0.85rem; color:#475569; margin-top:0.25rem;">Los agentes escribirán aquí sus decisiones automáticamente.</p>
+				</div>
+			} else {
+				<div class="audit-table-wrapper">
+					<table class="audit-table">
+						<thead>
+							<tr>
+								<th>Fecha</th>
+								<th>Agente</th>
+								<th>Acción</th>
+								<th>Confianza</th>
+								<th>Nodo</th>
+								<th>I/O</th>
+							</tr>
+						</thead>
+						<tbody>
+							for i, entry := range logs {
+								<tr class="audit-row">
+									<td class="audit-date">
+										<span class="date-day">{ entry.CreatedAt.Format("02 Jan") }</span>
+										<span class="date-time">{ entry.CreatedAt.Format("15:04:05") }</span>
+									</td>
+									<td class="audit-agent">
+										<span class="agent-icon">{ agentIcon(entry.AgentType) }</span>
+										<span class="agent-name">{ entry.AgentType }</span>
+									</td>
+									<td>
+										<span class={ "action-badge " + actionBadgeClass(entry.Action) }>{ entry.Action }</span>
+									</td>
+									<td class="audit-confidence">
+										if entry.Confidence != nil {
+											<div class="confidence-bar-wrap">
+												<div class="confidence-bar" style={ fmt.Sprintf("width: %d%%", entry.ConfidencePct()) }></div>
+												<span class="confidence-text">{ fmt.Sprintf("%d%%", entry.ConfidencePct()) }</span>
+											</div>
+										} else {
+											<span class="no-data">—</span>
+										}
+									</td>
+									<td class="audit-node">
+										if entry.NodeID != nil {
+											<code class="node-id-badge">{ (*entry.NodeID)[:8] }…</code>
+										} else {
+											<span class="no-data">—</span>
+										}
+									</td>
+									<td>
+										<button
+											class="btn-io"
+											data-io-target={ fmt.Sprintf("io-%d", i) }
+											aria-expanded="false"
+										>
+											Ver JSON &#x25BE;
+										</button>
+									</td>
+								</tr>
+								<tr id={ fmt.Sprintf("io-%d", i) } class="audit-io-row" style="display:none;">
+									<td colspan="6">
+										<div class="io-grid">
+											<div class="io-block">
+												<div class="io-label">&#x2BA4; Input</div>
+												<pre class="io-pre">{ entry.InputDataStr() }</pre>
+											</div>
+											<div class="io-block">
+												<div class="io-label">&#x2BA5; Output</div>
+												<pre class="io-pre">{ entry.OutputDataStr() }</pre>
+											</div>
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+
+		<style>
+			/* ── Audit Dashboard ──────────────────────────────────────── */
+			.audit-header {
+				display: flex; align-items: flex-start; justify-content: space-between;
+				gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+			}
+			.audit-title {
+				font-size: 1.85rem; font-weight: 800;
+				background: var(--gradient-title);
+				-webkit-background-clip: text; -webkit-text-fill-color: transparent;
+				margin-bottom: 0.25rem;
+			}
+			.audit-subtitle { color: #64748b; font-size: 0.9rem; }
+
+			.audit-stats { display: flex; gap: 0.75rem; }
+			.stat-pill {
+				display: flex; flex-direction: column; align-items: center;
+				padding: 0.6rem 1.25rem;
+				background: var(--bg-surface); border: 1px solid var(--border-subtle);
+				border-radius: 12px;
+			}
+			.stat-number { font-size: 1.5rem; font-weight: 800; color: var(--text-primary); }
+			.stat-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+
+			.audit-empty {
+				text-align: center; padding: 4rem 2rem;
+				border: 1px dashed rgba(255,255,255,0.1); border-radius: 18px;
+				color: #64748b;
+			}
+			.audit-empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+			/* Table */
+			.audit-table-wrapper {
+				overflow-x: auto;
+				border-radius: 16px;
+				border: 1px solid rgba(255,255,255,0.08);
+				background: rgba(255,255,255,0.02);
+			}
+			.audit-table {
+				width: 100%; border-collapse: collapse;
+				font-size: 0.875rem;
+			}
+			.audit-table thead {
+				background: var(--bg-surface);
+				border-bottom: 1px solid var(--border-subtle);
+			}
+			.audit-table thead th {
+				padding: 0.85rem 1rem; text-align: left;
+				font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+				letter-spacing: 0.07em; color: #94a3b8;
+			}
+			.audit-row td {
+				padding: 0.85rem 1rem;
+				border-bottom: 1px solid rgba(255,255,255,0.05);
+				vertical-align: middle;
+				transition: background 0.15s;
+			}
+			.audit-row:hover td { background: var(--bg-surface-hover); }
+			.audit-row:last-child td { border-bottom: none; }
+
+			/* Date cell */
+			.audit-date { display: flex; flex-direction: column; gap: 0.1rem; }
+			.date-day { color: #e2e8f0; font-weight: 600; white-space: nowrap; }
+			.date-time { color: #64748b; font-size: 0.78rem; white-space: nowrap; }
+
+			/* Agent cell */
+			.audit-agent { display: flex; align-items: center; gap: 0.5rem; }
+			.agent-icon { font-size: 1.1rem; }
+			.agent-name { color: var(--text-primary); font-weight: 500; }
+
+			/* Action badges */
+			.action-badge {
+				display: inline-block; padding: 0.25rem 0.65rem;
+				border-radius: 99px; font-size: 0.75rem; font-weight: 600;
+				white-space: nowrap;
+			}
+			.badge-approve { background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3); color: #6ee7b7; }
+			.badge-block   { background: rgba(239,68,68,0.12);  border: 1px solid rgba(239,68,68,0.3);  color: #f87171; }
+			.badge-suggest { background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.3); color: #93c5fd; }
+			.badge-default { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #94a3b8; }
+
+			/* Confidence bar */
+			.audit-confidence { min-width: 110px; }
+			.confidence-bar-wrap {
+				display: flex; align-items: center; gap: 0.6rem;
+			}
+			.confidence-bar {
+				height: 6px; border-radius: 99px; flex-shrink: 0;
+				background: var(--text-primary);
+				transition: width 0.4s ease;
+			}
+			.confidence-text { font-size: 0.78rem; color: #94a3b8; white-space: nowrap; }
+
+			/* Node ID badge */
+			.node-id-badge {
+				font-size: 0.75rem; padding: 0.15rem 0.5rem;
+				background: rgba(255,255,255,0.06); border-radius: 6px;
+				color: #94a3b8; font-family: monospace;
+			}
+
+			.no-data { color: #475569; }
+
+			/* IO expand button */
+			.btn-io {
+				padding: 0.3rem 0.75rem;
+				background: rgba(96,165,250,0.1);
+				border: 1px solid rgba(96,165,250,0.2);
+				border-radius: 8px; color: #93c5fd;
+				font-size: 0.78rem; cursor: pointer;
+				transition: background 0.2s;
+			}
+			.btn-io:hover { background: rgba(96,165,250,0.2); }
+
+			/* IO expanded rows */
+			.audit-io-row td { padding: 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+			.io-grid {
+				display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+				background: rgba(255,255,255,0.05);
+			}
+			@media (max-width: 700px) { .io-grid { grid-template-columns: 1fr; } }
+
+			.io-block {
+				background: #0f0f13; padding: 1rem 1.25rem;
+			}
+			.io-label {
+				font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+				letter-spacing: 0.08em; color: #64748b; margin-bottom: 0.5rem;
+			}
+			.io-pre {
+				font-family: "Fira Code", "Cascadia Code", monospace;
+				font-size: 0.78rem; color: #a5f3fc;
+				white-space: pre-wrap; word-break: break-all;
+				margin: 0; max-height: 260px; overflow-y: auto;
+				line-height: 1.55;
+			}
+		</style>
+
+		<script>
+			document.addEventListener('click', function(e) {
+				var btn = e.target.closest('[data-io-target]');
+				if (!btn) return;
+				var id = btn.getAttribute('data-io-target');
+				var row = document.getElementById(id);
+				if (!row) return;
+				var hidden = row.style.display === 'none';
+				row.style.display = hidden ? 'table-row' : 'none';
+				btn.setAttribute('aria-expanded', hidden ? 'true' : 'false');
+				btn.textContent = hidden ? 'Ocultar \u25B4' : 'Ver JSON \u25BE';
+			});
+		</script>
+	}
+}

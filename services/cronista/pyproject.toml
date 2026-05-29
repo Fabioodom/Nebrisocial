@@ -1,0 +1,17 @@
+[project]
+name = "cronista"
+version = "0.1.0"
+description = "Agente Cronista — Síntesis Diaria de Conocimiento para Nodal"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "apscheduler>=3.10.4",
+    "fastmcp>=3.3.1",
+    "langchain>=0.3.0",
+    "langchain-openai>=0.2.0",
+    "langchain-google-genai>=2.0.0",
+    "psycopg2-binary>=2.9.12",
+    "python-dotenv>=1.2.2",
+    "tiktoken>=0.8.0",
+    "tenacity>=9.1.4",
+]

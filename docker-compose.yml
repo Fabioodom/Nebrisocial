@@ -49,5 +49,74 @@ services:
       nats:
         condition: service_healthy
 
+  # ── Agente Curador (Enriquecedor de Metadatos MCP) ────────────────────────
+  curator:
+    build:
+      context: ./services/curator
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./services/curator/.env
+    environment:
+      NATS_URL: nats://nats:4222
+      DATABASE_URL: postgresql://nodal_user:${DB_PASSWORD:-nodal_password_dev}@db:5432/nodal_db
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8001"
+    ports:
+      - "8001:8001"   # Servidor FastMCP (SSE)
+    depends_on:
+      db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+
+  # ── Agente Cronista (Síntesis Diaria de Conocimiento) ────────────────────────
+  cronista:
+    build:
+      context: ./services/cronista
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./services/cronista/.env
+    environment:
+      DATABASE_URL: postgresql://nodal_user:${DB_PASSWORD:-nodal_password_dev}@db:5432/nodal_db
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8002"
+    ports:
+      - "8002:8002"   # Servidor FastMCP (SSE)
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Agente Investigador — Generador de UI en Go Templ + HTMX
+  # Puerto MCP (SSE): 8003
+  # ─────────────────────────────────────────────────────────────────────────
+  investigador:
+    build:
+      context: ./services/investigador
+      dockerfile: Dockerfile
+    container_name: nodal_investigador
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    env_file:
+      - ./services/investigador/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8003
+      - DESIGN_SYSTEM_REF_PATH=/app/design_system_ref.md
+    # El Investigador no depende de postgres ni nats
+    # Solo necesita acceso a internet para llamar a la API del LLM
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/sse')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+
 volumes:
   db_data:
+

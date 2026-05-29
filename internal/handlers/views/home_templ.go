@@ -8,9 +8,16 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// Layout es el layout base compartido por todas las páginas de Nodal.
-// Incluye htmx, estilos globales y estilos de auth.
-func Layout() templ.Component {
+import (
+	"fmt"
+	"nodal/internal/platform/database"
+	"strings"
+)
+
+// Home renderiza la página principal con estado de autenticación y lista de nodos.
+// El contenido se centra como un Feed tipo Reddit (max-w-4xl mx-auto).
+// Delega el shell HTML completo a Layout() definido en layout.templ.
+func Home(isAuthenticated bool, username string, nodes []database.Node) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -31,15 +38,43 @@ func Layout() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html lang=\"es\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Nodal</title><script src=\"https://unpkg.com/htmx.org@1.9.12\"></script><style>\n                *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n\n                body {\n                    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n                    background: #0f0f13;\n                    color: #e2e8f0;\n                    min-height: 100vh;\n                    display: flex;\n                    flex-direction: column;\n                    align-items: center;\n                }\n\n                .navbar {\n                    width: 100%;\n                    padding: 1rem 2rem;\n                    background: rgba(255,255,255,0.04);\n                    border-bottom: 1px solid rgba(255,255,255,0.08);\n                    display: flex;\n                    align-items: center;\n                    justify-content: space-between;\n                }\n                .navbar-brand { font-size: 1.25rem; font-weight: 700; color: #a78bfa; text-decoration: none; }\n                .navbar-actions { display: flex; gap: 0.75rem; align-items: center; }\n\n                .btn-primary {\n                    display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;\n                    padding: 0.75rem 1.5rem;\n                    background: linear-gradient(135deg, #7c3aed, #a855f7);\n                    color: #fff; border: none; border-radius: 10px;\n                    font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none;\n                    transition: opacity 0.2s, transform 0.15s;\n                }\n                .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }\n                .btn-primary-full { width: 100%; }\n\n                .btn-secondary {\n                    padding: 0.5rem 1rem;\n                    background: rgba(255,255,255,0.07);\n                    color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12);\n                    border-radius: 8px; font-size: 0.9rem; cursor: pointer;\n                    text-decoration: none; transition: background 0.2s;\n                }\n                .btn-secondary:hover { background: rgba(255,255,255,0.12); }\n\n                .btn-danger {\n                    padding: 0.5rem 1rem;\n                    background: rgba(239,68,68,0.15);\n                    color: #f87171; border: 1px solid rgba(239,68,68,0.3);\n                    border-radius: 8px; font-size: 0.9rem; cursor: pointer;\n                    transition: background 0.2s;\n                }\n                .btn-danger:hover { background: rgba(239,68,68,0.25); }\n\n                .auth-card {\n                    width: 100%; max-width: 420px;\n                    margin: 3rem auto;\n                    padding: 2.5rem;\n                    background: rgba(255,255,255,0.04);\n                    border: 1px solid rgba(255,255,255,0.08);\n                    border-radius: 18px;\n                }\n                .auth-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.4rem; }\n                .auth-subtitle { color: #94a3b8; margin-bottom: 1.75rem; }\n\n                .auth-error {\n                    background: rgba(239,68,68,0.12);\n                    border: 1px solid rgba(239,68,68,0.3);\n                    color: #f87171;\n                    padding: 0.75rem 1rem;\n                    border-radius: 8px;\n                    margin-bottom: 1rem;\n                    font-size: 0.9rem;\n                }\n\n                .auth-form { display: flex; flex-direction: column; gap: 1rem; }\n                .form-group { display: flex; flex-direction: column; gap: 0.4rem; }\n                .form-group label { font-size: 0.875rem; color: #cbd5e1; font-weight: 500; }\n                .form-group small { color: #64748b; }\n                .form-group input {\n                    padding: 0.7rem 1rem;\n                    background: rgba(255,255,255,0.06);\n                    border: 1px solid rgba(255,255,255,0.12);\n                    border-radius: 8px; color: #e2e8f0;\n                    font-size: 1rem; outline: none;\n                    transition: border-color 0.2s, box-shadow 0.2s;\n                }\n                .form-group input:focus {\n                    border-color: #7c3aed;\n                    box-shadow: 0 0 0 3px rgba(124,58,237,0.2);\n                }\n                .form-group input::placeholder { color: #475569; }\n\n                .auth-divider {\n                    display: flex; align-items: center; gap: 0.75rem;\n                    color: #475569; font-size: 0.85rem;\n                    margin: 1.25rem 0;\n                }\n                .auth-divider::before, .auth-divider::after {\n                    content: \"\"; flex: 1;\n                    border-top: 1px solid rgba(255,255,255,0.08);\n                }\n\n                .oauth-buttons { display: flex; gap: 0.75rem; }\n                .btn-oauth {\n                    flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem;\n                    padding: 0.65rem 1rem;\n                    border: 1px solid rgba(255,255,255,0.12);\n                    border-radius: 8px; font-size: 0.875rem; font-weight: 500;\n                    text-decoration: none; transition: background 0.2s;\n                }\n                .btn-google { background: rgba(234,67,53,0.1); color: #fca5a5; }\n                .btn-google:hover { background: rgba(234,67,53,0.2); }\n                .btn-github { background: rgba(255,255,255,0.06); color: #e2e8f0; }\n                .btn-github:hover { background: rgba(255,255,255,0.12); }\n\n                .auth-switch { text-align: center; font-size: 0.875rem; color: #64748b; margin-top: 1.5rem; }\n                .auth-switch a { color: #a78bfa; text-decoration: none; font-weight: 500; }\n                .auth-switch a:hover { text-decoration: underline; }\n\n                .page-content { width: 100%; max-width: 720px; padding: 2rem; }\n\n                .hero { text-align: center; padding: 3rem 0 2rem; }\n                .hero h1 {\n                    font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem;\n                    background: linear-gradient(135deg, #a78bfa, #818cf8);\n                    -webkit-background-clip: text; -webkit-text-fill-color: transparent;\n                }\n                .hero p { color: #94a3b8; font-size: 1.1rem; margin-bottom: 2rem; }\n                .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }\n\n                .greeting {\n                    display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;\n                    padding: 1rem 1.5rem;\n                    background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.2);\n                    border-radius: 12px;\n                }\n                .greeting-text { flex: 1; }\n                .greeting-name { font-size: 1.1rem; font-weight: 600; }\n                .greeting-role { font-size: 0.825rem; color: #94a3b8; }\n\n                .card {\n                    background: rgba(255,255,255,0.04);\n                    border: 1px solid rgba(255,255,255,0.08);\n                    border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem;\n                }\n                .card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }\n\n                .node-form { display: flex; flex-direction: column; gap: 0.85rem; }\n                .node-form input, .node-form textarea {\n                    padding: 0.65rem 0.9rem;\n                    background: rgba(255,255,255,0.06);\n                    border: 1px solid rgba(255,255,255,0.1);\n                    border-radius: 8px; color: #e2e8f0; font-size: 0.95rem; outline: none;\n                    transition: border-color 0.2s;\n                }\n                .node-form input:focus, .node-form textarea:focus { border-color: #7c3aed; }\n                .node-form textarea { resize: vertical; min-height: 80px; }\n                #form-result { margin-top: 0.5rem; font-size: 0.875rem; color: #6ee7b7; }\n            </style></head><body><nav class=\"navbar\"><a href=\"/\" class=\"navbar-brand\">&#x2B21; Nodal</a><div class=\"navbar-actions\"></div></nav>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templ_7745c5c3_Var1.Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</body></html>")
+		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"feed-container\"><!-- Sleek Feed Header --><div class=\"feed-header flex justify-between items-center\" style=\"margin-bottom: var(--space-4); border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-3);\"><h2 class=\"feed-header-title\" style=\"font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--text-primary);\">Feed Principal</h2></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if isAuthenticated {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- Formulario de creación de Nodo Estilo Reddit --> <div class=\"create-node-box\" id=\"create-node-box\"><!-- Falso input (Colapsado por defecto) --><div class=\"fake-input-box\" onclick=\"document.getElementById('create-node-box').classList.add('expanded')\"><span class=\"fake-input-avatar\">👤</span><div class=\"fake-input-placeholder\">Crear nueva comunidad o hilo...</div></div><!-- Formulario Real (Oculto hasta expandirse) --><div class=\"real-form-box\"><div class=\"form-header\"><h3 class=\"form-title\">Crear nueva comunidad</h3><button type=\"button\" class=\"btn-close-compact\" onclick=\"event.stopPropagation(); document.getElementById('create-node-box').classList.remove('expanded')\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line> <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg></button></div><form hx-post=\"/nodes\" hx-target=\"#form-result\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) { this.reset(); setTimeout(()=>window.location.reload(), 1200); }\" enctype=\"multipart/form-data\" class=\"node-form\"><div class=\"form-group\"><label for=\"node-title\">Nombre del Nodo</label> <input type=\"text\" id=\"node-title\" name=\"title\" placeholder=\"p. ej. Manga & Anime\" required></div><div class=\"form-group\"><label for=\"node-category\">Categoría</label> <select id=\"node-category\" name=\"category\"><option value=\"manga\">⛩️ Manga & Anime</option> <option value=\"ia\">🤖 IA & RAG</option> <option value=\"gaming\">🎮 Gaming</option> <option value=\"desarrollo\">🐹 Desarrollo & Diseño</option></select></div><div class=\"form-group\"><label for=\"node-description\">Descripción</label> <textarea id=\"node-description\" name=\"description\" placeholder=\"¿De qué trata esta comunidad?...\" rows=\"3\"></textarea></div><div class=\"form-group\"><label for=\"node-image\">Imagen de Portada</label> <input type=\"file\" id=\"node-image\" name=\"image\" accept=\"image/*\" class=\"w-full bg-bg-elevated border border-border-subtle rounded-md p-2 text-text-primary text-sm\"></div><div class=\"form-actions-row\"><button type=\"button\" class=\"btn-secondary\" onclick=\"document.getElementById('create-node-box').classList.remove('expanded')\">Cancelar</button> <button type=\"submit\" class=\"btn-primary\">Crear Nodo</button></div></form><div id=\"form-result\"></div></div></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- Feed de Nodos -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = NodeGrid(nodes).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = Layout(isAuthenticated, username).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -47,10 +82,9 @@ func Layout() templ.Component {
 	})
 }
 
-// Home renderiza la página principal con estado de autenticación.
-// isAuthenticated: true si hay sesión activa.
-// username: nombre del usuario autenticado (vacío si no lo está).
-func Home(isAuthenticated bool, username string) templ.Component {
+// NodeGrid renderiza el grid de tarjetas de Nodos.
+// Se puede reutilizar en Home (autenticado y anónimo) y en NodeExplorer.
+func NodeGrid(nodes []database.Node) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -66,58 +100,234 @@ func Home(isAuthenticated bool, username string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var2 == nil {
-			templ_7745c5c3_Var2 = templ.NopComponent
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var3 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-			if !templ_7745c5c3_IsBuffer {
-				defer func() {
-					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err == nil {
-						templ_7745c5c3_Err = templ_7745c5c3_BufErr
-					}
-				}()
-			}
-			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"page-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"nodes-section\"><div class=\"nodes-section-title\">&#9724; Nodos de la comunidad ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if len(nodes) > 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<span style=\"font-size:var(--font-size-sm); font-weight:var(--font-weight-normal); color:var(--text-muted);\">(")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if isAuthenticated {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"greeting\"><div class=\"greeting-text\"><div class=\"greeting-name\">&#128075; Hola, ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(username)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 192, Col: 77}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div class=\"greeting-role\">Miembro de Nodal</div></div><button class=\"btn-danger\" hx-post=\"/auth/logout\" hx-swap=\"none\" hx-on::after-request=\"window.location.href='/'\">Cerrar sesi&#243;n</button></div><div class=\"card\"><h2>Estado del Servidor</h2><button hx-get=\"/health\" hx-target=\"#health-response\" hx-swap=\"innerHTML\" class=\"btn-secondary\">Comprobar BD</button><div id=\"health-response\" style=\"margin-top:0.75rem; color:#6ee7b7; font-size:0.875rem;\"></div></div><div class=\"card\"><h2>Crear Nuevo Nodo</h2><form hx-post=\"/nodes\" hx-target=\"#form-result\" hx-swap=\"innerHTML\" class=\"node-form\"><input type=\"text\" name=\"title\" placeholder=\"T&#237;tulo del nodo\" required> <textarea name=\"description\" placeholder=\"Descripci&#243;n del nodo...\"></textarea> <button type=\"submit\" class=\"btn-primary\" style=\"width:auto; padding:0.6rem 1.25rem; margin-top:0.25rem;\">Crear Nodo</button></form><div id=\"form-result\"></div></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"hero\"><h1>Bienvenido a Nodal</h1><p>La red social basada en nodos tem&#225;ticos.<br>&#218;nete, participa y conecta con tu comunidad.</p><div class=\"hero-actions\"><a href=\"/register\" class=\"btn-primary\">Crear cuenta gratis</a> <a href=\"/login\" class=\"btn-secondary\" style=\"padding:0.75rem 2rem;\">Iniciar sesi&#243;n</a></div></div><div class=\"card\" style=\"text-align:center; padding:2rem;\"><button hx-get=\"/health\" hx-target=\"#health-response\" hx-swap=\"innerHTML\" class=\"btn-secondary\">Comprobar estado del servidor</button><div id=\"health-response\" style=\"margin-top:0.75rem; color:#6ee7b7; font-size:0.875rem;\"></div></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(nodes)))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 101, Col: 52}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			return nil
-		})
-		templ_7745c5c3_Err = Layout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " nodos)</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if len(nodes) == 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"nodes-empty\"><p>Todav&#237;a no hay nodos. &#128640;</p><p style=\"font-size:var(--font-size-base);\">&#161;S&#233; el primero en crear uno!</p></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"nodes-stack flex flex-col gap-0\" id=\"nodes-grid\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, n := range nodes {
+				templ_7745c5c3_Err = NodeCard(n).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// NodeCard renderiza la tarjeta de un Nodo individual enriquecida estilo post.
+func NodeCard(n database.Node) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"node-card-enriched mb-4\"><!-- Header: Autor / Categoría --><div class=\"node-card-header flex items-center justify-between mb-3\" style=\"display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-3);\"><div class=\"flex items-center\" style=\"display:flex; align-items:center; gap:var(--space-2);\"><div class=\"navbar-avatar\" style=\"width:24px; height:24px; font-size:var(--font-size-xs);\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(string(n.Title[0]))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 128, Col: 40}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div><span class=\"text-xs text-text-secondary font-medium\" style=\"font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:var(--font-weight-medium);\">u/CreadorAnonimo</span> <span class=\"text-xs text-text-muted\" style=\"font-size:var(--font-size-xs); color:var(--text-muted);\">•</span> <span class=\"text-xs text-text-muted\" style=\"font-size:var(--font-size-xs); color:var(--text-muted);\">Hace 2 horas</span></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if n.Category != "" {
+			var templ_7745c5c3_Var7 = []any{"node-card-category", "category-" + strings.ToLower(n.Category)}
+			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var7...)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<span class=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(templ.CSSClasses(templ_7745c5c3_Var7).String())
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 1, Col: 0}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(n.Category)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 135, Col: 108}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<span class=\"node-card-category category-general\">General</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div><!-- Título --><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 templ.SafeURL
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/nodes/" + n.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 142, Col: 49}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" style=\"text-decoration: none;\"><h3 style=\"font-size:var(--font-size-md); font-weight:var(--font-weight-bold); color:var(--text-primary); margin-bottom:var(--space-2);\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(n.Title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 143, Col: 158}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</h3></a><!-- Descripción -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if n.Description != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<p style=\"font-size:var(--font-size-base); color:var(--text-secondary); line-height:var(--line-height-normal); margin-bottom:var(--space-3);\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(n.Description)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 148, Col: 169}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</p>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<!-- Imagen del Nodo -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if n.ImageURL != nil && *n.ImageURL != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<img src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var13 string
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(*n.ImageURL)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 153, Col: 34}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"w-full h-64 object-cover rounded-xl mt-3 mb-6 border border-border-subtle\" alt=\"Imagen del nodo\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<!-- Botones de Interacción Falsos --><div class=\"flex items-center gap-6 mt-4 pt-3 border-t border-border-subtle/50 text-text-secondary\" style=\"display:flex; align-items:center; gap:var(--space-6); margin-top:var(--space-4); padding-top:var(--space-3); border-top:1px solid var(--border-subtle); color:var(--text-secondary);\"><!-- Like --><button class=\"flex items-center gap-1.5 hover:text-danger transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-heart\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"></path></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">42</span></button><!-- Comentar --><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var14 templ.SafeURL
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/nodes/" + n.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 165, Col: 53}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" class=\"flex items-center gap-1.5 hover:text-brand-soft transition-colors text-decoration-none text-text-secondary p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-message-square\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">12</span></a><!-- Compartir --><button class=\"flex items-center gap-1.5 hover:text-brand-soft transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover\" style=\"display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-share-2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" x2=\"15.42\" y1=\"13.51\" y2=\"16.49\"></line><line x1=\"15.41\" x2=\"8.59\" y1=\"7.51\" y2=\"10.49\"></line></svg> <span style=\"font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);\">Compartir</span></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

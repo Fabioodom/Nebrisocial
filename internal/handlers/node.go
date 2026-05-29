@@ -1,16 +1,25 @@
 package handlers
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
+	gorilla "github.com/gorilla/websocket"
 	nats "github.com/nats-io/nats.go"
 
+	"nodal/internal/auth"
+	"nodal/internal/handlers/views"
 	"nodal/internal/platform/database"
+	"nodal/internal/platform/websocket"
 )
 
 // nodeCreationPayload es el payload que se envía al Agente Guardián
@@ -19,6 +28,7 @@ type nodeCreationPayload struct {
 	NodeID      string `json:"node_id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	Category    string `json:"category"`
 	OwnerID     string `json:"owner_id"`
 	RequestedAt string `json:"requested_at"`
 }
@@ -37,7 +47,17 @@ type nodeCreatedEvent struct {
 	Slug        string `json:"slug"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	Category    string `json:"category"`
 	CreatedAt   string `json:"created_at"`
+}
+
+// chatMessageSentEvent es el payload que se publica al Agente Cronista
+// cada vez que se inserta un mensaje en un nodo (subject: chat.message.sent).
+type chatMessageSentEvent struct {
+	MessageID string `json:"message_id"`
+	NodeID    string `json:"node_id"`
+	Content   string `json:"content"`
+	CreatedAt string `json:"created_at"`
 }
 
 // CreateNodeHandler maneja POST /nodes.
@@ -55,12 +75,55 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 		}
 
 		// ── 1. Leer y validar formulario ────────────────────────────────────────
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			log.Printf("WARN: no se pudo parsear multipart form: %v", err)
+		}
+
 		title := r.FormValue("title")
 		description := r.FormValue("description")
-
+		category := r.FormValue("category")
 		if title == "" {
 			http.Error(w, "<div class=\"error\">El título no puede estar vacío</div>", http.StatusBadRequest)
 			return
+		}
+
+		if category == "" {
+			category = "manga"
+		}
+
+		var imageURL *string
+		file, header, err := r.FormFile("image")
+		if err == nil {
+			defer file.Close()
+			uploadsDir := "./static/uploads"
+			if err := os.MkdirAll(uploadsDir, os.ModePerm); err != nil {
+				log.Printf("ERROR: no se pudo crear el directorio de subidas: %v", err)
+				http.Error(w, "<div class=\"error\">Error interno del servidor</div>", http.StatusInternalServerError)
+				return
+			}
+
+			ext := filepath.Ext(header.Filename)
+			newFilename := fmt.Sprintf("img-%d%s", time.Now().UnixNano(), ext)
+			filePath := filepath.Join(uploadsDir, newFilename)
+
+			out, err := os.Create(filePath)
+			if err != nil {
+				log.Printf("ERROR: no se pudo crear el archivo en disco: %v", err)
+				http.Error(w, "<div class=\"error\">Error guardando la imagen</div>", http.StatusInternalServerError)
+				return
+			}
+			defer out.Close()
+
+			if _, err := io.Copy(out, file); err != nil {
+				log.Printf("ERROR: no se pudo copiar el archivo: %v", err)
+				http.Error(w, "<div class=\"error\">Error al escribir la imagen</div>", http.StatusInternalServerError)
+				return
+			}
+
+			urlPath := "/static/uploads/" + newFilename
+			imageURL = &urlPath
+		} else if err != http.ErrMissingFile {
+			log.Printf("WARN: error al obtener el archivo image: %v", err)
 		}
 
 		// ── 2. Construir payload para el Guardián ───────────────────────────────
@@ -71,6 +134,7 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 			NodeID:      slug, // usamos el slug como ID provisional
 			Title:       title,
 			Description: description,
+			Category:    category,
 			OwnerID:     "anonymous", // TODO: reemplazar con el user_id de la sesión JWT
 			RequestedAt: time.Now().UTC().Format(time.RFC3339),
 		}
@@ -83,14 +147,11 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 		}
 
 		// ── 3. NATS Request → Agente Guardián ──────────────────────────────────
-		// Timeout de 3 s: si el Guardián no responde, aprobamos con needs_review=true
-		// para no bloquear al usuario (PRD R3 – degradación elegante).
 		var decision guardianDecision
 
 		if nc != nil {
 			msg, requestErr := nc.Request("node.creation.requested", payloadBytes, 3*time.Second)
 			if requestErr != nil {
-				// Timeout o error de transporte → degradación elegante
 				log.Printf("WARN: el Guardián no respondió (%v); aprobando con needs_review", requestErr)
 				decision = guardianDecision{Decision: "approve", NeedsReview: true}
 			} else {
@@ -100,7 +161,6 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 				}
 			}
 		} else {
-			// NATS no configurado (entorno de desarrollo sin NATS) → aprobación directa
 			log.Println("WARN: NATS no conectado, saltando validación del Guardián")
 			decision = guardianDecision{Decision: "approve"}
 		}
@@ -117,7 +177,8 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 		}
 
 		// ── 4b. Guardián aprueba (o sugiere alternativas pero permite continuar) ─
-		if err := database.CreateNode(db, title, description); err != nil {
+		nodeID, err := database.CreateNode(db, title, description, category, imageURL)
+		if err != nil {
 			log.Printf("ERROR: no se pudo crear el nodo en BD: %v", err)
 			http.Error(w, fmt.Sprintf("<div class=\"error\">Error creando nodo: %v</div>", err), http.StatusInternalServerError)
 			return
@@ -126,16 +187,15 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 		// ── 5. Publicar evento node.created → Agente Curador ───────────────────
 		if nc != nil {
 			event := nodeCreatedEvent{
-				NodeID:      slug,
+				NodeID:      nodeID,
 				Slug:        slug,
 				Title:       title,
 				Description: description,
+				Category:    category,
 				CreatedAt:   time.Now().UTC().Format(time.RFC3339),
 			}
 			eventBytes, _ := json.Marshal(event)
 			if pubErr := nc.Publish("node.created", eventBytes); pubErr != nil {
-				// No es crítico: el nodo ya fue guardado; el Curador lo enriquecerá
-				// en cuanto NATS vuelva a estar disponible.
 				log.Printf("WARN: no se pudo publicar node.created: %v", pubErr)
 			}
 		}
@@ -149,5 +209,176 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 		} else {
 			fmt.Fprintf(w, `<div class="success">✅ Nodo "<strong>%s</strong>" creado con éxito.</div>`, title)
 		}
+	}
+}
+
+// NodeDetailHandler maneja GET /nodes/{id}
+// Muestra los detalles del nodo, el historial de chat y los resúmenes IA.
+func NodeDetailHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		// Extraer el ID de la URL: /nodes/{id}
+		nodeID := strings.TrimPrefix(r.URL.Path, "/nodes/")
+		nodeID = strings.TrimSuffix(nodeID, "/")
+		if nodeID == "" {
+			http.NotFound(w, r)
+			return
+		}
+
+		node, err := database.GetNodeByID(db, nodeID)
+		if err != nil {
+			log.Printf("WARN: nodo no encontrado id=%s: %v", nodeID, err)
+			http.NotFound(w, r)
+			return
+		}
+
+		messages, err := database.ListChatMessages(db, nodeID, 100)
+		if err != nil {
+			log.Printf("WARN: no se pudo cargar el chat del nodo %s: %v", nodeID, err)
+			messages = nil
+		}
+
+		// Cargar resúmenes IA generados por el Agente Cronista
+		threads, err := database.ListAIThreadsByNodeID(db, nodeID)
+		if err != nil {
+			log.Printf("WARN: no se pudo cargar los hilos IA del nodo %s: %v", nodeID, err)
+			threads = nil
+		}
+
+		// Detectar si hay sesión activa
+		isAuthenticated := false
+		username := ""
+		if cookie, err := r.Cookie("nodal_session"); err == nil {
+			tokenStr := strings.TrimSpace(cookie.Value)
+			if claims, err := auth.ValidateToken(tokenStr); err == nil {
+				isAuthenticated = true
+				if user, err := database.FindUserByID(db, claims.UserID); err == nil {
+					username = user.Username
+				} else {
+					username = "Miembro"
+				}
+			}
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		views.NodeDetail(node, messages, threads, isAuthenticated, username).Render(r.Context(), w)
+	}
+}
+
+
+// PostChatMessageHandler maneja POST /nodes/{id}/chat
+// Inserta un mensaje de chat, hace broadcast vía WebSocket y devuelve 204 No Content.
+func PostChatMessageHandler(db *sql.DB, nc *nats.Conn, hub *websocket.Hub) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		// Extraer el ID de la URL: /nodes/{id}/chat
+		path := strings.TrimPrefix(r.URL.Path, "/nodes/")
+		path = strings.TrimSuffix(path, "/chat")
+		nodeID := path
+		if nodeID == "" {
+			http.NotFound(w, r)
+			return
+		}
+
+		content := strings.TrimSpace(r.FormValue("content"))
+		if content == "" {
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, `<div class="chat-message"><div class="chat-message-bubble" style="color:#f87171;">El mensaje no puede estar vacío.</div></div>`)
+			return
+		}
+		if len(content) > 500 {
+			content = content[:500]
+		}
+
+		// Verificar que el nodo existe
+		if _, err := database.GetNodeByID(db, nodeID); err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		msg, err := database.CreateChatMessage(db, nodeID, content)
+		if err != nil {
+			log.Printf("ERROR: no se pudo insertar mensaje de chat en nodo %s: %v", nodeID, err)
+			http.Error(w, "Error interno del servidor", http.StatusInternalServerError)
+			return
+		}
+
+		// Publicar evento al Agente Cronista vía NATS
+		if nc != nil {
+			event := chatMessageSentEvent{
+				MessageID: msg.ID,
+				NodeID:    nodeID,
+				Content:   content,
+				CreatedAt: msg.CreatedAt.UTC().Format(time.RFC3339),
+			}
+			eventBytes, _ := json.Marshal(event)
+			if pubErr := nc.Publish("chat.message.sent", eventBytes); pubErr != nil {
+				log.Printf("WARN: no se pudo publicar chat.message.sent: %v", pubErr)
+			} else {
+				log.Printf("INFO: chat.message.sent publicado — nodo=%s msg=%s", nodeID, msg.ID)
+			}
+		}
+
+		// Renderizar y hacer broadcast del mensaje vía WebSocket Hub
+		if hub != nil {
+			var buf bytes.Buffer
+			if err := views.ChatMessageBroadcast(msg).Render(r.Context(), &buf); err != nil {
+				log.Printf("ERROR: error renderizando ChatMessageBroadcast: %v", err)
+			} else {
+				hub.Broadcast(nodeID, buf.Bytes())
+			}
+		}
+
+		// Retornar 204 No Content ya que la actualización de la UI se realiza vía WS
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+var upgrader = gorilla.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true // Permitir todas las conexiones para desarrollo local
+	},
+}
+
+// WebSocketHandler maneja la actualización del protocolo de HTTP a WS.
+func WebSocketHandler(hub *websocket.Hub) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Extraer el ID de la URL: /nodes/{id}/ws
+		path := strings.TrimPrefix(r.URL.Path, "/nodes/")
+		path = strings.TrimSuffix(path, "/ws")
+		nodeID := path
+		if nodeID == "" {
+			http.Error(w, "Node ID required", http.StatusBadRequest)
+			return
+		}
+
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Printf("WS: Upgrade failed for node %s: %v", nodeID, err)
+			return
+		}
+
+		client := &websocket.Client{
+			Hub:    hub,
+			Conn:   conn,
+			Send:   make(chan []byte, 256),
+			NodeID: nodeID,
+		}
+
+		hub.Register(client)
+
+		go client.WritePump()
+		go client.ReadPump()
 	}
 }
