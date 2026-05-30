@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 
 	"nodal/internal/platform/database"
 
@@ -78,7 +79,7 @@ func GenerateOAuthState() (string, error) {
 
 // googleUserInfo representa el subconjunto de datos que devuelve la API de Google.
 type googleUserInfo struct {
-	Sub   string `json:"sub"`
+	Sub   string `json:"sub"`   // ID único del usuario en Google
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
@@ -122,15 +123,16 @@ func HandleGoogleCallback(ctx context.Context, db *sql.DB, code string) (*databa
 		return nil, fmt.Errorf("oauth/google: email vacío en la respuesta")
 	}
 
-	// Upsert en la BD
-	return database.UpsertOAuthUser(db, sanitizeUsername(userInfo.Name, userInfo.Email), userInfo.Email)
+	// Upsert en la BD usando el 'sub' de Google como providerID
+	return database.CreateOrUpdateOAuthUser(db, "google", userInfo.Sub, userInfo.Email, sanitizeUsername(userInfo.Name, userInfo.Email))
 }
 
 // ── Callbacks de GitHub ───────────────────────────────────────────────────────
 
 // githubUserInfo representa el subconjunto de datos que devuelve la API de GitHub.
 type githubUserInfo struct {
-	Login string `json:"login"`
+	ID    int64  `json:"id"`    // ID numérico único del usuario en GitHub
+	Login string `json:"login"` // Username de GitHub
 	Email string `json:"email"`
 }
 
@@ -174,7 +176,9 @@ func HandleGitHubCallback(ctx context.Context, db *sql.DB, code string) (*databa
 		return nil, fmt.Errorf("oauth/github: no se pudo obtener email del usuario")
 	}
 
-	return database.UpsertOAuthUser(db, userInfo.Login, email)
+	// Upsert en la BD usando el ID numérico de GitHub como providerID
+	providerID := strconv.FormatInt(userInfo.ID, 10)
+	return database.CreateOrUpdateOAuthUser(db, "github", providerID, email, userInfo.Login)
 }
 
 // fetchGitHubUser obtiene el perfil básico del usuario autenticado en GitHub.

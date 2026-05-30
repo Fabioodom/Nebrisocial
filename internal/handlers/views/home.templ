@@ -109,7 +109,7 @@ templ NodeGrid(nodes []database.Node) {
                 <p style="font-size:var(--font-size-base);">&#161;S&#233; el primero en crear uno!</p>
             </div>
         } else {
-            <div class="nodes-stack flex flex-col gap-0" id="nodes-grid">
+            <div class="nodes-stack flex flex-col gap-0" id="main-feed">
                 for _, n := range nodes {
                     @NodeCard(n)
                 }
@@ -120,16 +120,16 @@ templ NodeGrid(nodes []database.Node) {
 
 // NodeCard renderiza la tarjeta de un Nodo individual enriquecida estilo post.
 templ NodeCard(n database.Node) {
-    <div class="node-card-enriched mb-4">
+    <article class="node-card-enriched mb-4">
         <!-- Header: Autor / Categoría -->
         <div class="node-card-header flex items-center justify-between mb-3" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-3);">
             <div class="flex items-center" style="display:flex; align-items:center; gap:var(--space-2);">
-                <div class="navbar-avatar" style="width:24px; height:24px; font-size:var(--font-size-xs);">
-                    { string(n.Title[0]) }
-                </div>
-                <span class="text-xs text-text-secondary font-medium" style="font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:var(--font-weight-medium);">u/CreadorAnonimo</span>
+                <a href={ templ.SafeURL("/profile?username=" + n.Username) } class="flex items-center" style="display:flex; align-items:center; gap:var(--space-2); text-decoration:none; color:inherit;">
+                    @Avatar(n.UserInitial)
+                    <span class="text-xs text-text-secondary font-medium hover:underline cursor-pointer" style="font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:var(--font-weight-medium);">u/{ n.Username }</span>
+                </a>
                 <span class="text-xs text-text-muted" style="font-size:var(--font-size-xs); color:var(--text-muted);">•</span>
-                <span class="text-xs text-text-muted" style="font-size:var(--font-size-xs); color:var(--text-muted);">Hace 2 horas</span>
+                <span class="text-xs text-text-muted" style="font-size:var(--font-size-xs); color:var(--text-muted);">{ TimeAgo(n.CreatedAt) }</span>
             </div>
             if n.Category != "" {
                 <span class={ "node-card-category", "category-" + strings.ToLower(n.Category) }>{ n.Category }</span>
@@ -153,25 +153,155 @@ templ NodeCard(n database.Node) {
             <img src={ *n.ImageURL } class="w-full h-64 object-cover rounded-xl mt-3 mb-6 border border-border-subtle" alt="Imagen del nodo" />
         }
 
-        <!-- Botones de Interacción Falsos -->
+        <!-- Botones de Interacción -->
         <div class="flex items-center gap-6 mt-4 pt-3 border-t border-border-subtle/50 text-text-secondary" style="display:flex; align-items:center; gap:var(--space-6); margin-top:var(--space-4); padding-top:var(--space-3); border-top:1px solid var(--border-subtle); color:var(--text-secondary);">
             <!-- Like -->
-            <button class="flex items-center gap-1.5 hover:text-danger transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover" style="display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                <span style="font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);">42</span>
+            <button
+                class="flex items-center gap-1.5 hover:text-danger transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover"
+                style="display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);"
+                hx-post={ "/nodes/" + n.ID + "/like" }
+                hx-swap="outerHTML"
+                hx-target="closest article"
+            >
+                if n.IsLiked {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart" style="color: var(--color-danger, #ef4444);"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                } else {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                }
+                <span style="font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);">{ fmt.Sprintf("%d", n.LikesCount) }</span>
             </button>
             
             <!-- Comentar -->
             <a href={ templ.SafeURL("/nodes/" + n.ID) } class="flex items-center gap-1.5 hover:text-brand-soft transition-colors text-decoration-none text-text-secondary p-1 rounded hover:bg-bg-surface-hover" style="display:flex; align-items:center; gap:6px; text-decoration:none; color:inherit; padding:var(--space-1); border-radius:var(--radius-sm);">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <span style="font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);">12</span>
+                <span style="font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);">Chat</span>
             </a>
 
+            <!-- Guardar -->
+            @SaveButton(n.ID, n.IsSaved)
+            
             <!-- Compartir -->
-            <button class="flex items-center gap-1.5 hover:text-brand-soft transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover" style="display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-share-2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="16.49"/><line x1="15.41" x2="8.59" y1="7.51" y2="10.49"/></svg>
-                <span style="font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);">Compartir</span>
+            <button
+                class="flex items-center gap-1.5 bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover"
+                style="display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm); margin-left:auto; transition: color 0.2s ease;"
+                onclick={ shareNode(n.ID) }
+            >
+                <svg id={ "share-icon-" + n.ID } xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                <span id={ "share-label-" + n.ID } style="font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);">Compartir</span>
             </button>
         </div>
+    </article>
+}
+
+
+// ToastSetup inyecta el contenedor global de toasts, su CSS y la función JS nodalShowToast.
+// Debe incluirse UNA sola vez en el layout principal.
+templ ToastSetup() {
+    <style>
+        #nodal-toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .nodal-toast {
+            background: var(--bg-surface, #1e1e2e);
+            color: var(--text-primary, #e2e8f0);
+            border: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+            padding: 12px 18px;
+            border-radius: var(--radius-lg, 10px);
+            font-size: var(--font-size-sm, 13px);
+            font-weight: var(--font-weight-medium, 500);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            backdrop-filter: blur(12px);
+            animation: nodalToastIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes nodalToastIn {
+            from { transform: translateY(16px) scale(0.95); opacity: 0; }
+            to   { transform: translateY(0)    scale(1);    opacity: 1; }
+        }
+    </style>
+    <div id="nodal-toast-container"></div>
+    <script>
+        window.nodalShowToast = function(msg) {
+            var container = document.getElementById("nodal-toast-container");
+            if (!container) { return; }
+            var toast = document.createElement("div");
+            toast.className = "nodal-toast";
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(function() { toast.remove(); }, 3000);
+        };
+    </script>
+}
+
+// shareNode genera el handler JS inline del botón Compartir:
+// copia la URL del nodo al portapapeles y da feedback visual 2.5s.
+script shareNode(nodeID string) {
+    var url = window.location.origin + "/nodes/" + nodeID;
+    var label = document.getElementById("share-label-" + nodeID);
+    var icon  = document.getElementById("share-icon-"  + nodeID);
+
+    navigator.clipboard.writeText(url).then(function() {
+        if (label) {
+            label.textContent = "¡Copiado! ✅";
+            label.style.color = "var(--color-success, #4ade80)";
+        }
+        if (icon) {
+            icon.style.stroke = "var(--color-success, #4ade80)";
+        }
+        nodalShowToast("🔗 Enlace copiado al portapapeles");
+        setTimeout(function() {
+            if (label) {
+                label.textContent = "Compartir";
+                label.style.color = "";
+            }
+            if (icon) {
+                icon.style.stroke = "";
+            }
+        }, 2500);
+    }).catch(function() {
+        var el = document.createElement("textarea");
+        el.value = url;
+        el.style.position = "fixed";
+        el.style.opacity  = "0";
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+        nodalShowToast("🔗 Enlace copiado");
+        if (label) { label.textContent = "¡Copiado! ✅"; label.style.color = "var(--color-success, #4ade80)"; }
+        setTimeout(function() {
+            if (label) { label.textContent = "Compartir"; label.style.color = ""; }
+        }, 2500);
+    });
+}
+
+// Avatar renderiza el componente de avatar con la inicial del usuario.
+templ Avatar(initial string) {
+    <div class="navbar-avatar" style="width:24px; height:24px; font-size:var(--font-size-xs);">
+        { initial }
     </div>
+}
+
+// SaveButton renderiza el botón de guardar/bookmark con HTMX para actualizarse in-place.
+templ SaveButton(nodeID string, isSaved bool) {
+    <button
+        class="flex items-center gap-1.5 hover:text-brand-soft transition-colors bg-transparent border-none cursor-pointer p-1 rounded hover:bg-bg-surface-hover"
+        style="display:flex; align-items:center; gap:6px; background:transparent; border:none; color:inherit; cursor:pointer; padding:var(--space-1); border-radius:var(--radius-sm);"
+        hx-post={ "/nodes/" + nodeID + "/save" }
+        hx-swap="outerHTML"
+        hx-target="this"
+    >
+        if isSaved {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bookmark" style="color: var(--color-brand-soft, #38bdf8);"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+        } else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bookmark"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+        }
+        <span style="font-size:var(--font-size-xs); font-weight:var(--font-weight-semibold);">Guardar</span>
+    </button>
 }

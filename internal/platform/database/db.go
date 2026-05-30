@@ -43,6 +43,39 @@ func InitDB() (*sql.DB, error) {
 	}
 
 	log.Println("Successfully connected to the database!")
+
+	// Run inline migrations to ensure new schema columns and tables exist
+	migrations := []string{
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT;`,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_private BOOLEAN DEFAULT FALSE;`,
+		`ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;`,
+		`CREATE TABLE IF NOT EXISTS user_follows (
+			follower_id UUID REFERENCES users(id) ON DELETE CASCADE,
+			following_id UUID REFERENCES users(id) ON DELETE CASCADE,
+			created_at TIMESTAMPTZ DEFAULT NOW(),
+			PRIMARY KEY (follower_id, following_id)
+		);`,
+		`ALTER TABLE user_follows ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'accepted';`,
+		`CREATE TABLE IF NOT EXISTS notifications (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+			actor_id UUID REFERENCES users(id) ON DELETE CASCADE,
+			type VARCHAR(50) NOT NULL,
+			reference_id UUID,
+			is_read BOOLEAN DEFAULT FALSE,
+			created_at TIMESTAMPTZ DEFAULT NOW()
+		);`,
+		`ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS parent_id UUID;`,
+		`ALTER TABLE chat_messages DROP CONSTRAINT IF EXISTS chat_messages_parent_id_fkey;`,
+		`ALTER TABLE chat_messages ADD CONSTRAINT chat_messages_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES chat_messages(id) ON DELETE CASCADE;`,
+	}
+
+	for _, m := range migrations {
+		if _, err := db.Exec(m); err != nil {
+			log.Printf("WARN: failed to execute schema migration query: %q, err: %v", m, err)
+		}
+	}
+
 	return db, nil
 }
 

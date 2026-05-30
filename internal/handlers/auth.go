@@ -157,7 +157,7 @@ func clearSessionCookie(w http.ResponseWriter) {
 	})
 }
 
-// ── AuthHandler ───────────────────────────────────────────────────────────────
+var globalAuthHandler *AuthHandler
 
 // AuthHandler provee los manejadores HTTP para el flujo de autenticación.
 type AuthHandler struct {
@@ -166,7 +166,45 @@ type AuthHandler struct {
 
 // NewAuthHandler crea un AuthHandler con la BD inyectada.
 func NewAuthHandler(db *sql.DB) *AuthHandler {
-	return &AuthHandler{db: db}
+	h := &AuthHandler{db: db}
+	globalAuthHandler = h
+	return h
+}
+
+// OAuthGoogleLogin inicia el flujo OAuth2 con Google.
+func OAuthGoogleLogin(w http.ResponseWriter, r *http.Request) {
+	if globalAuthHandler != nil {
+		globalAuthHandler.GoogleLogin(w, r)
+	} else {
+		http.Error(w, "AuthHandler no inicializado", http.StatusInternalServerError)
+	}
+}
+
+// OAuthGoogleCallback procesa el callback de Google.
+func OAuthGoogleCallback(w http.ResponseWriter, r *http.Request) {
+	if globalAuthHandler != nil {
+		globalAuthHandler.GoogleCallback(w, r)
+	} else {
+		http.Error(w, "AuthHandler no inicializado", http.StatusInternalServerError)
+	}
+}
+
+// OAuthGithubLogin inicia el flujo OAuth2 con GitHub.
+func OAuthGithubLogin(w http.ResponseWriter, r *http.Request) {
+	if globalAuthHandler != nil {
+		globalAuthHandler.GitHubLogin(w, r)
+	} else {
+		http.Error(w, "AuthHandler no inicializado", http.StatusInternalServerError)
+	}
+}
+
+// OAuthGithubCallback procesa el callback de GitHub.
+func OAuthGithubCallback(w http.ResponseWriter, r *http.Request) {
+	if globalAuthHandler != nil {
+		globalAuthHandler.GitHubCallback(w, r)
+	} else {
+		http.Error(w, "AuthHandler no inicializado", http.StatusInternalServerError)
+	}
 }
 
 // ── GET /login ────────────────────────────────────────────────────────────────
@@ -320,9 +358,18 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !crypto.CheckPassword(password, user.PasswordHash) {
+	if !crypto.CheckPassword(password, func() string {
+		if user.PasswordHash == nil {
+			return ""
+		}
+		return *user.PasswordHash
+	}()) || user.PasswordHash == nil {
 		if isHTMX(r) {
-			writeHTMLError(w, http.StatusUnauthorized, "Credenciales inválidas. Revisa tu email y contraseña.")
+			if user.PasswordHash == nil {
+				writeHTMLError(w, http.StatusUnauthorized, "Esta cuenta fue creada con "+user.AuthProvider+". Usa el botón de inicio de sesión con ese proveedor.")
+			} else {
+				writeHTMLError(w, http.StatusUnauthorized, "Credenciales inválidas. Revisa tu email y contraseña.")
+			}
 			return
 		}
 		writeError(w, http.StatusUnauthorized, "credenciales inválidas")
