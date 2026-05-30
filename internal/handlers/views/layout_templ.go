@@ -60,7 +60,7 @@ func Layout(isAuthenticated bool, username string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<main class=\"main-content w-full max-w-2xl mx-auto flex-1 min-w-0 pb-20\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<main class=\"main-content flex-1 min-w-0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -77,10 +77,6 @@ func Layout(isAuthenticated bool, username string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = MobileBottomNav().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -143,7 +139,7 @@ func LayoutWithMarkdown(isAuthenticated bool, username string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<main class=\"main-content w-full flex-1 min-w-0 pb-20\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<main class=\"main-content flex-1 min-w-0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -160,10 +156,6 @@ func LayoutWithMarkdown(isAuthenticated bool, username string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = MobileBottomNav().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -215,7 +207,7 @@ func NavBar(isAuthenticated bool, username string) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(string(username[0]))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/layout.templ`, Line: 210, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/layout.templ`, Line: 208, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -234,7 +226,7 @@ func NavBar(isAuthenticated bool, username string) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("@" + username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/layout.templ`, Line: 215, Col: 95}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/layout.templ`, Line: 213, Col: 95}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -312,7 +304,7 @@ func Widgets() templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<aside class=\"widgets-sidebar flex flex-col gap-6 w-80 flex-shrink-0 hidden lg:block\" hx-get=\"/components/sidebar/right\" hx-trigger=\"load\" hx-swap=\"outerHTML\"><div class=\"widget-box w-full\"><h3 class=\"widget-title flex items-center gap-2\"><span class=\"widget-title-icon\" style=\"display: inline-flex; align-items: center; color: var(--text-muted);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-flame\"><path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z\"></path></svg></span> Tendencias</h3><div style=\"color: var(--text-muted); font-size: var(--font-size-xs); padding: var(--space-2);\">Cargando tendencias...</div></div></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<aside class=\"widgets-sidebar flex flex-col gap-6 w-80 flex-shrink-0 hidden lg:flex\" hx-get=\"/components/sidebar/right\" hx-trigger=\"load\" hx-swap=\"outerHTML\"><div class=\"widget-box w-full\"><h3 class=\"widget-title flex items-center gap-2\"><span class=\"widget-title-icon\" style=\"display: inline-flex; align-items: center; color: var(--text-muted);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-flame\"><path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z\"></path></svg></span> Tendencias</h3><div style=\"color: var(--text-muted); font-size: var(--font-size-xs); padding: var(--space-2);\">Cargando tendencias...</div></div></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -343,36 +335,6 @@ func ThemeInitScript() templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<!-- Evitar parpadeos de tema aplicando antes del renderizado --><script>\n\t\t(function() {\n\t\t\tvar theme = localStorage.getItem('theme') || 'dark';\n\t\t\tdocument.documentElement.setAttribute('data-theme', theme);\n\t\t})();\n\t</script><script>\n\t\tfunction updateThemeIcons() {\n\t\t\tvar theme = document.documentElement.getAttribute('data-theme') || 'dark';\n\t\t\tvar darkIcon = document.getElementById('theme-toggle-dark-icon');\n\t\t\tvar lightIcon = document.getElementById('theme-toggle-light-icon');\n\t\t\tif (!darkIcon || !lightIcon) return;\n\t\t\tif (theme === 'dark') {\n\t\t\t\tdarkIcon.classList.add('hidden');\n\t\t\t\tlightIcon.classList.remove('hidden');\n\t\t\t} else {\n\t\t\t\tdarkIcon.classList.remove('hidden');\n\t\t\t\tlightIcon.classList.add('hidden');\n\t\t\t}\n\t\t}\n\t\tfunction toggleTheme() {\n\t\t\tvar currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';\n\t\t\tvar newTheme = currentTheme === 'dark' ? 'light' : 'dark';\n\t\t\tdocument.documentElement.setAttribute('data-theme', newTheme);\n\t\t\tlocalStorage.setItem('theme', newTheme);\n\t\t\tupdateThemeIcons();\n\t\t}\n\t\tfunction toggleSidebar() {\n\t\t\tvar sidebar = document.querySelector('.sidebar');\n\t\t\tif (sidebar) {\n\t\t\t\tsidebar.classList.toggle('mobile-open');\n\t\t\t}\n\t\t}\n\t\tdocument.addEventListener('DOMContentLoaded', updateThemeIcons);\n\t\tdocument.addEventListener('htmx:afterSwap', updateThemeIcons);\n\t</script>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// MobileBottomNav renderiza la barra de navegación inferior en dispositivos móviles.
-func MobileBottomNav() templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var9 == nil {
-			templ_7745c5c3_Var9 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<nav class=\"fixed bottom-0 w-full bg-gray-900 border-t border-gray-800 flex justify-around items-center p-3 md:hidden z-50\" style=\"background: var(--bg-surface); border-top: 1px solid var(--border-subtle); box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15); height: 56px; box-sizing: border-box;\"><a href=\"/\" class=\"mobile-nav-item\" style=\"color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; flex: 1;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"></path><polyline points=\"9 22 9 12 15 12 15 22\"></polyline></svg> <span style=\"font-size: 10px; font-weight: var(--font-weight-medium);\">Inicio</span></a> <a href=\"/explore\" class=\"mobile-nav-item\" style=\"color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; flex: 1;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"></line></svg> <span style=\"font-size: 10px; font-weight: var(--font-weight-medium);\">Explorar</span></a> <a href=\"/profile\" class=\"mobile-nav-item\" style=\"color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; flex: 1;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"></path><circle cx=\"12\" cy=\"7\" r=\"4\"></circle></svg> <span style=\"font-size: 10px; font-weight: var(--font-weight-medium);\">Perfil</span></a> <button type=\"button\" onclick=\"openNotificationsModal()\" class=\"mobile-nav-item\" style=\"background: transparent; border: none; cursor: pointer; padding: 0; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit; flex: 1;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"></path><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"></path></svg> <span style=\"font-size: 10px; font-weight: var(--font-weight-medium);\">Notificaciones</span></button></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
