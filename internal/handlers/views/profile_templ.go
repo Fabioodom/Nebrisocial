@@ -8,8 +8,13 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// Profile renderiza el esqueleto de la página de perfil con pestañas falsas.
-func Profile(isAuthenticated bool, username string) templ.Component {
+import (
+	"nodal/internal/platform/database"
+	"strconv"
+)
+
+// Profile renderiza la página de perfil (propia o ajena).
+func Profile(isAuthenticated bool, currentUsername string, targetUser *database.User, stats *database.ProfileStats, isOwnProfile bool, ownedNodes []database.Node, savedNodes []database.Node) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -42,15 +47,15 @@ func Profile(isAuthenticated bool, username string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"profile-container\"><!-- Header de Perfil --><div class=\"profile-header\"><div class=\"profile-avatar\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"profile-container\" style=\"max-width: 800px; margin: 0 auto; padding: var(--space-4);\"><!-- Header de Perfil --><div class=\"profile-header\" style=\"position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); background: var(--bg-surface); padding: var(--space-6); border-radius: var(--radius-xl); border: 1px solid var(--border-subtle);\"><div style=\"display: flex; gap: var(--space-5); align-items: center; flex-wrap: wrap;\"><div class=\"profile-avatar\" style=\"width: 80px; height: 80px; border-radius: 50%; background: var(--brand-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: var(--font-weight-bold); border: 3px solid var(--border-subtle); box-shadow: 0 4px 12px rgba(0,0,0,0.1);\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if username != "" {
+			if targetUser.Username != "" {
 				var templ_7745c5c3_Var3 string
-				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string(username[0]))
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string(targetUser.Username[0]))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 11, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 17, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -62,28 +67,355 @@ func Profile(isAuthenticated bool, username string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"profile-info\"><h1 class=\"profile-name\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"profile-info\" style=\"display: flex; flex-direction: column; gap: var(--space-1);\"><h1 class=\"profile-name\" style=\"font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: var(--space-2);\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs("@" + username)
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs("@" + targetUser.Username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 17, Col: 61}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 24, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h1><p class=\"profile-joined\">Miembro de Nodal</p></div></div><!-- Tabs falsas --><div class=\"profile-tabs\"><button class=\"profile-tab active\">Mis Nodos</button> <button class=\"profile-tab\">Guardados</button> <button class=\"profile-tab\">Publicaciones</button></div><!-- Contenido de las tabs --><div class=\"profile-content\"><div class=\"profile-empty\"><div class=\"profile-empty-icon\">📂</div><p class=\"profile-empty-title\">No hay elementos para mostrar</p><p class=\"profile-empty-subtitle\">Esta sección está vacía por el momento.</p></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if targetUser.IsPrivate {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<span title=\"Perfil Privado\" style=\"color: var(--text-muted); display: inline-flex; align-items: center;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-lock\"><rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"></rect><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path></svg></span>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</h1><p class=\"profile-joined\" style=\"font-size: var(--font-size-xs); color: var(--text-muted); margin: 0;\">Miembro de Nodal</p><!-- Biografía -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if targetUser.Bio != nil && *targetUser.Bio != "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<p class=\"profile-bio text-text-secondary\" style=\"margin-top: var(--space-2); font-size: var(--font-size-sm); color: var(--text-secondary); max-width: 500px; line-height: 1.4; margin-bottom: 0;\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(*targetUser.Bio)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 36, Col: 49}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<p class=\"profile-bio text-text-muted\" style=\"margin-top: var(--space-2); font-size: var(--font-size-sm); color: var(--text-muted); font-style: italic; margin-bottom: 0;\">Sin biografía.</p>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div><!-- Botón de Acción y Estadísticas (Derecha) -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ProfileStatsAndActions(targetUser, stats, isOwnProfile).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><!-- Contenido de las Pestañas --><div class=\"profile-content-area\" style=\"width: 100%; margin-top: var(--space-4);\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if !isOwnProfile && targetUser.IsPrivate && !stats.IsFollowing {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<!-- Lock screen para perfiles privados sin seguimiento --> <div class=\"profile-empty\" style=\"padding: var(--space-8) var(--space-4); border: 1px dashed var(--border-subtle); border-radius: var(--radius-xl); text-align: center; background: var(--bg-surface);\"><div class=\"profile-empty-icon\" style=\"font-size: 3rem; margin-bottom: var(--space-3); color: var(--text-muted);\">🔒</div><p class=\"profile-empty-title\" style=\"font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--text-primary); margin-bottom: var(--space-2);\">Esta cuenta es privada</p><p class=\"profile-empty-subtitle\" style=\"font-size: var(--font-size-sm); color: var(--text-muted); max-width: 320px; margin: 0 auto;\">Sigue a @")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(targetUser.Username)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 58, Col: 188}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " para ver sus nodos creados y actividad.</p></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<!-- Tabs Horizontales --> <div class=\"profile-tabs flex border-b border-border-subtle gap-4\" style=\"border-bottom: 1px solid var(--border-subtle); display: flex; gap: var(--space-4); margin-bottom: var(--space-4);\"><button class=\"profile-tab active\" id=\"tab-owned\" onclick=\"switchProfileTab('owned')\">Mis Nodos</button> ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if isOwnProfile {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<button class=\"profile-tab\" id=\"tab-saved\" onclick=\"switchProfileTab('saved')\">Guardados</button>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><!-- Contenedores --> <div id=\"container-owned\" class=\"profile-tab-content\"><h2 style=\"font-size: var(--font-size-md); font-weight: var(--font-weight-bold); color: var(--text-primary); margin-bottom: var(--space-4);\">Nodos Creados</h2>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if len(ownedNodes) == 0 {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"profile-empty\"><div class=\"profile-empty-icon\">📂</div><p class=\"profile-empty-title\">Sin nodos creados</p><p class=\"profile-empty-subtitle\">¡Explora y crea comunidades para comenzar a conversar!</p></div>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"nodes-stack flex flex-col gap-0\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					for _, n := range ownedNodes {
+						templ_7745c5c3_Err = NodeCard(n).Render(ctx, templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if isOwnProfile {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div id=\"container-saved\" class=\"profile-tab-content hidden\"><h2 style=\"font-size: var(--font-size-md); font-weight: var(--font-weight-bold); color: var(--text-primary); margin-bottom: var(--space-4);\">Nodos Guardados</h2>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					if len(savedNodes) == 0 {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"profile-empty\"><div class=\"profile-empty-icon\">🔖</div><p class=\"profile-empty-title\">No tienes ningún nodo guardado</p><p class=\"profile-empty-subtitle\">Guarda nodos interesantes en el feed para acceder a ellos rápidamente.</p></div>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					} else {
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"nodes-stack flex flex-col gap-0\">")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						for _, n := range savedNodes {
+							templ_7745c5c3_Err = NodeCard(n).Render(ctx, templ_7745c5c3_Buffer)
+							if templ_7745c5c3_Err != nil {
+								return templ_7745c5c3_Err
+							}
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div>")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</div>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</div></div><!-- Dialog de Editar Perfil (Únicamente para el propietario) --> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if isOwnProfile {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<dialog id=\"edit-profile-modal\" class=\"ai-modal\"><div class=\"ai-modal-wrapper w-full\" style=\"max-width: 500px; margin: 0 auto;\"><div class=\"ai-modal-header flex items-center justify-between p-4 border-b border-border-subtle bg-bg-surface\"><div class=\"flex items-center gap-2\"><span style=\"display: inline-flex; align-items: center; color: var(--brand-soft);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-cog\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"></path><circle cx=\"12\" cy=\"7\" r=\"4\"></circle><circle cx=\"19\" cy=\"11\" r=\"1\"></circle><circle cx=\"22\" cy=\"11\" r=\"1\"></circle></svg></span><h3 class=\"text-md font-semibold text-text-primary\" style=\"margin: 0;\">Editar Perfil</h3></div><button type=\"button\" class=\"btn-close-compact text-text-muted hover:text-text-primary\" onclick=\"document.getElementById('edit-profile-modal').close()\" aria-label=\"Cerrar modal\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-x\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg></button></div><div class=\"p-6\" style=\"background: var(--bg-surface);\"><form action=\"/profile/edit\" method=\"POST\" style=\"display: flex; flex-direction: column; gap: var(--space-4);\"><div style=\"display: flex; flex-direction: column; gap: var(--space-2);\"><label for=\"edit-bio\" style=\"font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--text-primary);\">Biografía</label> <textarea id=\"edit-bio\" name=\"bio\" class=\"chat-textarea w-full bg-bg-surface border border-border-subtle rounded-lg px-4 py-2\" rows=\"3\" placeholder=\"Escribe algo sobre ti...\" style=\"resize: none; width: 100%; box-sizing: border-box; font-family: inherit; font-size: var(--font-size-base); color: var(--text-primary); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); padding: var(--space-2); background: var(--bg-surface);\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if targetUser.Bio != nil {
+					var templ_7745c5c3_Var7 string
+					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(*targetUser.Bio)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 134, Col: 57}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</textarea></div><div style=\"display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-1);\"><input type=\"checkbox\" id=\"edit-private\" name=\"is_private\" style=\"width: 16px; height: 16px; cursor: pointer;\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if targetUser.IsPrivate {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, " checked")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "> <label for=\"edit-private\" style=\"font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--text-primary); cursor: pointer; user-select: none;\">Perfil Privado</label></div><p style=\"font-size: var(--font-size-xs); color: var(--text-muted); margin: 0; line-height: 1.3;\">Al hacer privado tu perfil, las personas que no te sigan verán un candado en lugar de tus nodos creados.</p><div style=\"display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-4);\"><button type=\"button\" class=\"btn-secondary\" onclick=\"document.getElementById('edit-profile-modal').close()\">Cancelar</button> <button type=\"submit\" class=\"btn-primary\" style=\"background-color: var(--brand-color); color: white; border: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-weight: var(--font-weight-semibold); cursor: pointer;\">Guardar Cambios</button></div></form></div></div></dialog><script>\n                window.openEditProfileModal = function() {\n                    var modal = document.getElementById('edit-profile-modal');\n                    if (!modal) return;\n\n                    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';\n                    modal.setAttribute('data-theme', isDark ? 'dark' : 'light');\n\n                    var wrapper = modal.querySelector('.ai-modal-wrapper');\n                    var header  = modal.querySelector('.ai-modal-header');\n\n                    if (isDark) {\n                        modal.style.setProperty('background-color', '#121212', 'important');\n                        modal.style.setProperty('background',       '#121212', 'important');\n                        modal.style.setProperty('color',            '#fafafa', 'important');\n                        modal.style.setProperty('border-color',     '#27272a', 'important');\n                        if (wrapper) {\n                            wrapper.style.setProperty('background-color', '#121212', 'important');\n                            wrapper.style.setProperty('color',            '#fafafa', 'important');\n                        }\n                        if (header) {\n                            header.style.setProperty('background-color',   '#121212', 'important');\n                            header.style.setProperty('color',               '#fafafa', 'important');\n                            header.style.setProperty('border-bottom-color', '#27272a', 'important');\n                        }\n                    } else {\n                        modal.style.removeProperty('background-color');\n                        modal.style.removeProperty('background');\n                        modal.style.removeProperty('color');\n                        modal.style.removeProperty('border-color');\n                        if (wrapper) {\n                            wrapper.style.removeProperty('background-color');\n                            wrapper.style.removeProperty('color');\n                        }\n                        if (header) {\n                            header.style.removeProperty('background-color');\n                            header.style.removeProperty('color');\n                            header.style.removeProperty('border-bottom-color');\n                        }\n                    }\n\n                    modal.showModal();\n                };\n            </script>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, " <!-- Script de control client-side de las pestañas --> <script>\n            function switchProfileTab(tab) {\n                var cOwned = document.getElementById('container-owned');\n                var cSaved = document.getElementById('container-saved');\n                var tOwned = document.getElementById('tab-owned');\n                var tSaved = document.getElementById('tab-saved');\n\n                if (cOwned) cOwned.classList.add('hidden');\n                if (cSaved) cSaved.classList.add('hidden');\n                \n                if (tOwned) tOwned.classList.remove('active');\n                if (tSaved) tSaved.classList.remove('active');\n                \n                if (tab === 'owned') {\n                    if (cOwned) cOwned.classList.remove('hidden');\n                    if (tOwned) tOwned.classList.add('active');\n                } else if (tab === 'saved') {\n                    if (cSaved) cSaved.classList.remove('hidden');\n                    if (tSaved) tSaved.classList.add('active');\n                }\n            }\n        </script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Layout(isAuthenticated, username).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Layout(isAuthenticated, currentUsername).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// ProfileStatsAndActions renderiza el botón de acción y estadísticas del perfil en un solo contenedor swapable
+func ProfileStatsAndActions(targetUser *database.User, stats *database.ProfileStats, isOwnProfile bool) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div id=\"profile-actions-area\" style=\"display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-2); flex-shrink: 0; margin-left: auto;\"><!-- Contadores de estadísticas --><div class=\"profile-stats\" style=\"display: flex; gap: var(--space-3); font-size: var(--font-size-sm); color: var(--text-muted); align-items: center; margin-bottom: var(--space-1);\"><span><strong style=\"color: var(--text-primary);\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(stats.FollowersCount))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 233, Col: 89}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</strong> Seguidores</span> <span style=\"color: var(--border-subtle);\">·</span> <span><strong style=\"color: var(--text-primary);\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(stats.FollowingCount))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 235, Col: 89}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</strong> Siguiendo</span></div><!-- Botón de Acción --><div class=\"profile-actions\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if isOwnProfile {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<button type=\"button\" class=\"btn-secondary\" onclick=\"openEditProfileModal()\" style=\"display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-weight: var(--font-weight-semibold); border: 1px solid var(--border-subtle); cursor: pointer;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-pencil\"><path d=\"M12 20h9\"></path><path d=\"M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z\"></path></svg> Editar Perfil</button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = FollowButton(targetUser.ID, stats.FollowStatus).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// FollowButton renderiza el botón de Seguir/Siguiendo/Pendiente con HTMX
+func FollowButton(userID string, status string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		if status == "accepted" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<button hx-post=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue("/users/" + userID + "/follow")
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 256, Col: 43}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" hx-target=\"#profile-actions-area\" hx-swap=\"outerHTML\" class=\"btn-outline\" style=\"border: 1px solid var(--brand-color); color: var(--brand-color); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-weight: var(--font-weight-semibold); cursor: pointer; background: transparent; transition: background-color var(--transition-normal); display: inline-flex; align-items: center; gap: var(--space-2);\" onmouseover=\"this.style.backgroundColor='var(--bg-surface-hover)'\" onmouseout=\"this.style.backgroundColor='transparent'\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-check\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"></path><circle cx=\"12\" cy=\"7\" r=\"4\"></circle><path d=\"m16 11 2 2 4-4\"></path></svg> Siguiendo</button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else if status == "pending" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<button hx-post=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var13 string
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue("/users/" + userID + "/follow")
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 269, Col: 43}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" hx-target=\"#profile-actions-area\" hx-swap=\"outerHTML\" class=\"btn-outline\" style=\"border: 1px solid var(--border-subtle); color: var(--text-muted); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-weight: var(--font-weight-semibold); cursor: pointer; background: var(--bg-surface-hover); display: inline-flex; align-items: center; gap: var(--space-2);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-clock\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg> Pendiente</button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<button hx-post=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var14 string
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue("/users/" + userID + "/follow")
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/profile.templ`, Line: 280, Col: 43}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\" hx-target=\"#profile-actions-area\" hx-swap=\"outerHTML\" class=\"btn-primary\" style=\"background-color: var(--brand-color); color: white; border: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-weight: var(--font-weight-semibold); cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-2);\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-plus\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"></path><circle cx=\"12\" cy=\"7\" r=\"4\"></circle><line x1=\"19\" x2=\"19\" y1=\"8\" y2=\"14\"></line><line x1=\"16\" x2=\"22\" y1=\"11\" y2=\"11\"></line></svg> Seguir</button>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		return nil
 	})

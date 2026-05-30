@@ -34,12 +34,17 @@ func buildTimeline(messages []database.ChatMessage, threads []database.Thread) [
 // Usa LayoutWithMarkdown para incluir marked.js (renderizado de resúmenes IA).
 templ NodeDetail(node *database.Node, messages []database.ChatMessage, threads []database.Thread, isAuthenticated bool, username string) {
     @LayoutWithMarkdown(isAuthenticated, username) {
-        <!-- Cargar extensión WebSocket de HTMX -->
-        <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
-
-        <div class="node-detail-container flex h-[calc(100vh-57px)] overflow-hidden w-full bg-bg-base">
+        <div class="node-detail-container flex flex-col lg:flex-row h-[calc(100vh-57px)] overflow-hidden w-full bg-bg-base">
+            <style>
+                .replies-list:empty {
+                    border-left: none !important;
+                    padding-left: 0 !important;
+                    margin-top: 0 !important;
+                    margin-bottom: 0 !important;
+                }
+            </style>
             <!-- Columna Izquierda (Chat - 70%): flex-1 flex flex-col min-w-0 bg-bg-base -->
-            <div class="chat-column flex-1 flex flex-col min-w-0 bg-bg-base h-full">
+            <div class="chat-column flex-1 flex flex-col min-w-0 bg-bg-base h-2/3 lg:h-full">
                 
                 <!-- Header del Nodo / Canal (Estilo Discord) -->
                 <div class="node-detail-header p-4 border-b border-border-subtle bg-bg-base flex-shrink-0">
@@ -67,8 +72,45 @@ templ NodeDetail(node *database.Node, messages []database.ChatMessage, threads [
                                 Sin mensajes aún. ¡Escribe el primero para comenzar!
                             </div>
                         } else {
-                            for _, msg := range messages {
-                                @ChatMessageItem(&msg)
+                            for i := range messages {
+                                <div class="chat-message-container" id={ "message-container-" + messages[i].ID }>
+                                    @ChatMessageItem(&messages[i], false)
+                                    
+                                    <!-- Formulario inline de respuesta -->
+                                    <form
+                                        id={ "reply-form-" + messages[i].ID }
+                                        hx-post={ "/nodes/" + node.ID + "/chat" }
+                                        hx-swap="none"
+                                        hx-on::after-request="if(event.detail.successful) { this.reset(); toggleReplyForm(this.querySelector('input[name=parent_id]').value); }"
+                                        class="reply-form"
+                                        style="display: none; margin-top: 0.5rem; margin-left: 2.5rem; margin-bottom: 0.5rem;"
+                                    >
+                                        <input type="hidden" name="parent_id" value={ messages[i].ID } />
+                                        <div style="display: flex; gap: var(--space-2); align-items: flex-end; width: 100%;">
+                                            <textarea
+                                                name="content"
+                                                placeholder="Escribe una respuesta..."
+                                                required
+                                                style="flex: 1; resize: none; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); padding: var(--space-2); font-family: inherit; font-size: var(--font-size-sm); background: var(--bg-surface-hover); color: var(--text-primary); outline: none;"
+                                                rows="1"
+                                                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit();}"
+                                            ></textarea>
+                                            <button type="submit" class="btn-primary" style="padding: var(--space-2) var(--space-4); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); cursor: pointer; background-color: var(--brand-color); color: white; border: none; outline: none; border-radius: 9999px;">
+                                                Responder
+                                            </button>
+                                            <button type="button" class="btn-secondary" data-message-id={ messages[i].ID } onclick="toggleReplyForm(this.dataset.messageId)" style="padding: var(--space-2) var(--space-4); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); cursor: pointer; background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); border-radius: 9999px;">
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Lista de respuestas del mensaje raíz -->
+                                    <div id={ "replies-" + messages[i].ID } class="replies-list" style="margin-left: 2.5rem; border-left: 2px solid var(--border-subtle); padding-left: 1rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                        for j := range messages[i].Replies {
+                                            @ChatMessageItem(&messages[i].Replies[j], true)
+                                        }
+                                    </div>
+                                </div>
                             }
                         }
                     </div>
@@ -85,33 +127,35 @@ templ NodeDetail(node *database.Node, messages []database.ChatMessage, threads [
                                     document.getElementById('chat-counter').textContent='0/500';
                                 }
                             "
-                            class="chat-form w-full relative"
+                            class="chat-form w-full"
                         >
-                            <textarea
-                                id="chat-input"
-                                name="content"
-                                class="chat-textarea w-full bg-bg-surface border border-border-subtle rounded-full px-6 py-3"
-                                placeholder="Escribe un mensaje al nodo&#8230;"
-                                maxlength="500"
-                                rows="1"
-                                required
-                                oninput="document.getElementById('chat-counter').textContent=this.value.length+'/500';
-                                         this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,80)+'px';"
-                                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit();}"
-                            ></textarea>
-                            <button type="submit" class="chat-send-btn absolute right-4 top-1/2 -translate-y-1/2" id="chat-send" aria-label="Enviar mensaje">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-                                </svg>
-                            </button>
+                            <div style="position: relative; width: 100%;">
+                                <textarea
+                                    id="chat-input"
+                                    name="content"
+                                    class="chat-textarea w-full bg-bg-surface border border-border-subtle rounded-full px-6 py-3"
+                                    placeholder="Escribe un mensaje al nodo&#8230;"
+                                    maxlength="500"
+                                    rows="1"
+                                    required
+                                    oninput="document.getElementById('chat-counter').textContent=this.value.length+'/500';
+                                             this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,80)+'px';"
+                                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit();}"
+                                ></textarea>
+                                <button type="submit" class="chat-send-btn absolute right-4 top-1/2 -translate-y-1/2" id="chat-send" aria-label="Enviar mensaje">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                                    </svg>
+                                </button>
+                            </div>
                         </form>
                         <div class="chat-counter text-xs text-text-muted mt-1 text-right" id="chat-counter">0/500</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Columna Derecha (Agente Cronista - 30%): w-80 flex-shrink-0 border-l border-border-subtle bg-bg-surface flex flex-col h-full hidden lg:flex -->
-            <aside class="cronista-column w-80 flex-shrink-0 border-l border-border-subtle bg-bg-surface flex flex-col h-full hidden lg:flex">
+            <!-- Columna Derecha (Agente Cronista - 30%): w-full lg:w-80 flex-shrink-0 border-t lg:border-t-0 lg:border-l border-border-subtle bg-bg-surface flex flex-col h-1/3 lg:h-full -->
+            <aside class="cronista-column w-full lg:w-80 flex-shrink-0 border-t lg:border-t-0 lg:border-l border-border-subtle bg-bg-surface flex flex-col h-1/3 lg:h-full">
                 <div class="cronista-panel flex flex-col h-full w-full bg-bg-surface" style="border: none; border-radius: 0;">
                     <div class="cronista-panel-header p-4 border-b border-border-subtle bg-bg-surface flex items-center gap-2">
                         <span class="cronista-title-icon" style="display: inline-flex; align-items: center; color: var(--text-primary);">
@@ -174,6 +218,19 @@ templ NodeDetail(node *database.Node, messages []database.ChatMessage, threads [
 
         <!-- Lógica de Auto-scroll, Renderizado de Markdown y Modal -->
         <script>
+        window.toggleReplyForm = function(msgId) {
+            var form = document.getElementById('reply-form-' + msgId);
+            if (form) {
+                if (form.style.display === 'none' || form.style.display === '') {
+                    form.style.display = 'block';
+                    var textarea = form.querySelector('textarea');
+                    if (textarea) textarea.focus();
+                } else {
+                    form.style.display = 'none';
+                }
+            }
+        };
+
         // Función global para abrir el modal del Agente Cronista
         window.openAiModal = function(title, rawMd) {
             var titleEl = document.getElementById('ai-modal-title');
@@ -281,25 +338,94 @@ templ NodeDetail(node *database.Node, messages []database.ChatMessage, threads [
     }
 }
 
-// ChatMessageItem es un mensaje de chat formateado al estilo timeline de Discord.
-templ ChatMessageItem(m *database.ChatMessage) {
-    <div class="chat-message flex flex-row gap-3" style="animation: fadeInFast 0.25s ease;">
-        <div class="chat-avatar w-10 h-10 flex-shrink-0 rounded-full bg-bg-surface border border-border-subtle flex items-center justify-center font-semibold text-text-secondary" style="font-size: var(--font-size-md);">A</div>
-        <div class="chat-message-body flex-1 flex flex-col min-w-0">
-            <div class="chat-message-header flex items-center gap-2">
-                <span class="chat-message-author text-sm font-semibold text-text-primary">Anónimo</span>
-                <span class="chat-message-time text-xs text-text-muted">{ m.CreatedAt.Format("15:04") }</span>
-            </div>
-            <div class="chat-message-text text-text-secondary">{ m.Content }</div>
-        </div>
-    </div>
+// ChatMessageItem es un mensaje de chat formateado al estilo timeline de Discord/Reddit.
+templ ChatMessageItem(m *database.ChatMessage, isReply bool) {
+	<div class="chat-message flex flex-row gap-3" style={ MsgReplyStyle(isReply) }>
+		if m.UserID != nil && *m.UserID != "" {
+			<a href={ templ.SafeURL("/profile?id=" + *m.UserID) } 
+			   class={ "chat-avatar flex-shrink-0 rounded-full bg-bg-surface border border-border-subtle flex items-center justify-center font-semibold text-text-secondary hover:border-brand-color transition-colors text-decoration-none", templ.KV("w-10 h-10", !isReply), templ.KV("w-8 h-8", isReply) } 
+			   style={ MsgAvatarStyle(isReply) }>
+				{ m.UserInitial }
+			</a>
+		} else {
+			<div class={ "chat-avatar flex-shrink-0 rounded-full bg-bg-surface border border-border-subtle flex items-center justify-center font-semibold text-text-secondary", templ.KV("w-10 h-10", !isReply), templ.KV("w-8 h-8", isReply) }
+			     style={ AnonAvatarStyle(isReply) }>{ m.UserInitial }</div>
+		}
+		<div class="chat-message-body flex-1 flex flex-col min-w-0">
+			<div class="chat-message-header flex items-center gap-2">
+				if m.UserID != nil && *m.UserID != "" {
+					<a href={ templ.SafeURL("/profile?id=" + *m.UserID) } class={ "chat-message-author font-semibold text-text-primary hover:text-brand-color transition-colors", templ.KV("text-sm", !isReply), templ.KV("text-xs", isReply) } style="text-decoration: none;">
+						{ m.Username }
+					</a>
+				} else {
+					<span class={ "chat-message-author font-semibold text-text-primary", templ.KV("text-sm", !isReply), templ.KV("text-xs", isReply) }>{ m.Username }</span>
+				}
+				<span class="chat-message-time text-xs text-text-muted">{ TimeAgo(m.CreatedAt) }</span>
+				
+				<!-- Botón responder (solo para mensajes raíz) -->
+				if !isReply {
+					<button
+						type="button"
+						data-message-id={ m.ID }
+						onclick="toggleReplyForm(this.dataset.messageId)"
+						class="btn-reply text-xs text-text-muted hover:text-brand-color"
+						style="background:none; border:none; cursor:pointer; color:var(--text-muted); display:inline-flex; align-items:center; gap:4px; margin-left:8px; transition:color 0.2s;"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-reply"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+						Responder
+					</button>
+				}
+			</div>
+
+			<div class={ "chat-message-text text-text-secondary", templ.KV("text-sm", isReply) }>{ m.Content }</div>
+		</div>
+	</div>
 }
 
 // ChatMessageBroadcast es el fragmento HTML enviado vía WebSocket para inserción OOB.
 templ ChatMessageBroadcast(m *database.ChatMessage) {
-    <div id="chat-messages" hx-swap-oob="beforeend">
-        @ChatMessageItem(m)
-    </div>
+	if m.ParentID == nil || *m.ParentID == "" {
+		<div id="chat-messages" hx-swap-oob="beforeend">
+			<div class="chat-message-container" id={ "message-container-" + m.ID }>
+				@ChatMessageItem(m, false)
+				
+				<!-- Formulario inline de respuesta -->
+				<form
+					id={ "reply-form-" + m.ID }
+					hx-post={ "/nodes/" + m.NodeID + "/chat" }
+					hx-swap="none"
+					hx-on::after-request="if(event.detail.successful) { this.reset(); toggleReplyForm(this.querySelector('input[name=parent_id]').value); }"
+					class="reply-form"
+					style="display: none; margin-top: 0.5rem; margin-left: 2.5rem; margin-bottom: 0.5rem;"
+				>
+					<input type="hidden" name="parent_id" value={ m.ID } />
+					<div style="display: flex; gap: var(--space-2); align-items: flex-end; width: 100%;">
+						<textarea
+							name="content"
+							placeholder="Escribe una respuesta..."
+							required
+							style="flex: 1; resize: none; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); padding: var(--space-2); font-family: inherit; font-size: var(--font-size-sm); background: var(--bg-surface-hover); color: var(--text-primary); outline: none;"
+							rows="1"
+							onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit();}"
+						></textarea>
+						<button type="submit" class="btn-primary" style="padding: var(--space-2) var(--space-4); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); cursor: pointer; background-color: var(--brand-color); color: white; border: none; outline: none; border-radius: 9999px;">
+							Responder
+						</button>
+						<button type="button" class="btn-secondary" data-message-id={ m.ID } onclick="toggleReplyForm(this.dataset.messageId)" style="padding: var(--space-2) var(--space-4); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); cursor: pointer; background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); border-radius: 9999px;">
+							Cancelar
+						</button>
+					</div>
+				</form>
+
+				<!-- Lista de respuestas del mensaje raíz -->
+				<div id={ "replies-" + m.ID } class="replies-list" style="margin-left: 2.5rem; border-left: 2px solid var(--border-subtle); padding-left: 1rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem;"></div>
+			</div>
+		</div>
+	} else {
+		<div id={ "replies-" + *m.ParentID } hx-swap-oob="beforeend">
+			@ChatMessageItem(m, true)
+		</div>
+	}
 }
 
 // CronistaThreadItem renderiza un resumen de chat en el panel del Agente Cronista en formato teaser clicable.

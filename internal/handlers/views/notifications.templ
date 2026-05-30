@@ -1,0 +1,160 @@
+package views
+
+import (
+	"nodal/internal/platform/database"
+)
+
+// NotificationCard renderiza una tarjeta de notificación.
+// Soporta: follow_request, follow_accepted, node_liked, reply_received.
+templ NotificationCard(n database.Notification) {
+	if n.Type == "node_liked" {
+		// Tarjeta clickable que lleva al nodo
+		<a
+			class="notification-item notification-card"
+			href={ templ.SafeURL(func() string {
+				if n.ReferenceID != nil && *n.ReferenceID != "" {
+					return "/nodes/" + *n.ReferenceID
+				}
+				return "#"
+			}())}
+			style="display: flex; align-items: center; gap: var(--space-3); background: var(--bg-surface); padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); transition: all var(--transition-normal); text-decoration: none; color: inherit;"
+		>
+			<div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(239,68,68,0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+				💖
+			</div>
+			<div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;">
+				<p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-primary); line-height: 1.4;">
+					<span style="font-weight: var(--font-weight-semibold);">{ "@" + n.ActorUsername }</span> le ha dado Me Gusta a tu comunidad.
+				</p>
+				<span style="font-size: var(--font-size-xs); color: var(--text-muted);">Me gusta · Ver nodo →</span>
+			</div>
+		</a>
+	} else if n.Type == "reply_received" {
+		// Tarjeta clickable que lleva al nodo con el chat
+		<a
+			class="notification-item notification-card"
+			href={ templ.SafeURL(func() string {
+				if n.ReferenceID != nil && *n.ReferenceID != "" {
+					return "/nodes/" + *n.ReferenceID
+				}
+				return "#"
+			}())}
+			style="display: flex; align-items: center; gap: var(--space-3); background: var(--bg-surface); padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); transition: all var(--transition-normal); text-decoration: none; color: inherit;"
+		>
+			<div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+				💬
+			</div>
+			<div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;">
+				<p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-primary); line-height: 1.4;">
+					<span style="font-weight: var(--font-weight-semibold);">{ "@" + n.ActorUsername }</span> ha respondido a tu mensaje.
+				</p>
+				<span style="font-size: var(--font-size-xs); color: var(--text-muted);">Respuesta en el chat · Ver →</span>
+			</div>
+		</a>
+	} else {
+		// Tarjeta follow_request / follow_accepted / genérica
+		<div class="notification-item notification-card" style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); background: var(--bg-surface); padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); transition: all var(--transition-normal);">
+			<div style="display: flex; align-items: center; gap: var(--space-3);">
+				<!-- Avatar miniatura del actor -->
+				<div class="notification-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-color); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: var(--font-weight-semibold); border: 1px solid var(--border-subtle); flex-shrink: 0;">
+					if n.ActorUsername != "" {
+						{ string(n.ActorUsername[0]) }
+					} else {
+						👤
+					}
+				</div>
+
+				<div style="display: flex; flex-direction: column; gap: 2px;">
+					<p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-primary); line-height: 1.4;">
+						if n.Type == "follow_request" {
+							<a href={ "/profile?username=" + n.ActorUsername } style="font-weight: var(--font-weight-semibold); color: var(--text-primary); text-decoration: none;">{ "@" + n.ActorUsername }</a> quiere seguirte.
+						} else if n.Type == "follow_accepted" {
+							<a href={ "/profile?username=" + n.ActorUsername } style="font-weight: var(--font-weight-semibold); color: var(--text-primary); text-decoration: none;">{ "@" + n.ActorUsername }</a> aceptó tu solicitud de seguimiento.
+						} else {
+							Acción de <a href={ "/profile?username=" + n.ActorUsername } style="font-weight: var(--font-weight-semibold); color: var(--text-primary); text-decoration: none;">{ "@" + n.ActorUsername }</a>.
+						}
+					</p>
+					<span style="font-size: var(--font-size-xs); color: var(--text-muted);">
+						if n.Type == "follow_request" {
+							Solicitud de seguimiento
+						} else if n.Type == "follow_accepted" {
+							Seguidor nuevo ✅
+						}
+					</span>
+				</div>
+			</div>
+
+			<!-- Acciones de notificación -->
+			if n.Type == "follow_request" {
+				<div class="notification-actions" style="display: flex; gap: var(--space-2); align-items: center;">
+					<button
+						hx-post={ "/notifications/" + n.ID + "/accept" }
+						hx-target="closest .notification-item"
+						hx-swap="outerHTML"
+						class="btn-primary"
+						style="background-color: var(--brand-color); color: white; border: none; padding: var(--space-1-5) var(--space-3); border-radius: var(--radius-md); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); cursor: pointer;"
+					>
+						Aceptar
+					</button>
+					<button
+						hx-post={ "/notifications/" + n.ID + "/reject" }
+						hx-target="closest .notification-item"
+						hx-swap="outerHTML"
+						class="btn-secondary"
+						style="background-color: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: var(--space-1-5) var(--space-3); border-radius: var(--radius-md); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); cursor: pointer;"
+						onmouseover="this.style.backgroundColor='var(--bg-surface-hover)'"
+						onmouseout="this.style.backgroundColor='transparent'"
+					>
+						Rechazar
+					</button>
+				</div>
+			}
+		</div>
+	}
+}
+
+templ NotificationsList(notifications []database.Notification) {
+	if len(notifications) == 0 {
+		<div class="profile-empty" style="padding: var(--space-8) var(--space-4); border: 1px dashed var(--border-subtle); border-radius: var(--radius-xl); text-align: center; background: var(--bg-surface);">
+			<div class="profile-empty-icon" style="font-size: 3rem; margin-bottom: var(--space-3); color: var(--text-muted);">🔔</div>
+			<p class="profile-empty-title" style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--text-primary); margin-bottom: var(--space-2);">Todo al día</p>
+			<p class="profile-empty-subtitle" style="font-size: var(--font-size-sm); color: var(--text-muted); max-width: 320px; margin: 0 auto;">No tienes notificaciones pendientes por ahora.</p>
+		</div>
+	} else {
+		<div class="notifications-list" style="display: flex; flex-direction: column; gap: var(--space-2); max-height: 380px; overflow-y: auto; padding-right: var(--space-1);">
+			for _, n := range notifications {
+				@NotificationCard(n)
+			}
+		</div>
+	}
+}
+
+// NotificationsModalContent renderiza el contenido interno del modal (lista sin límite de altura).
+templ NotificationsModalContent(notifications []database.Notification) {
+	if len(notifications) == 0 {
+		<div style="padding: var(--space-8) var(--space-4); text-align: center;">
+			<div style="font-size: 3rem; margin-bottom: var(--space-3);">🔔</div>
+			<p style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--text-primary); margin-bottom: var(--space-2);">Todo al día</p>
+			<p style="font-size: var(--font-size-sm); color: var(--text-muted);">No tienes notificaciones pendientes por ahora.</p>
+		</div>
+	} else {
+		<div style="display: flex; flex-direction: column; gap: var(--space-2);">
+			for _, n := range notifications {
+				@NotificationCard(n)
+			}
+		</div>
+	}
+}
+
+templ NotificationsPage(isAuthenticated bool, currentUsername string, notifications []database.Notification) {
+	@Layout(isAuthenticated, currentUsername) {
+		<div class="notifications-container" style="max-width: 600px; margin: 0 auto; padding: var(--space-4);">
+			<h1 style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--text-primary); margin-bottom: var(--space-6); display: flex; align-items: center; gap: var(--space-3);">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell" style="color: var(--brand-color);"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+				Notificaciones
+			</h1>
+
+			@NotificationsList(notifications)
+		</div>
+	}
+}

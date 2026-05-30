@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -18,6 +20,7 @@ import (
 
 	"nodal/internal/auth"
 	"nodal/internal/handlers/views"
+	"nodal/internal/middleware"
 	"nodal/internal/platform/database"
 	"nodal/internal/platform/websocket"
 )
@@ -126,6 +129,12 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 			log.Printf("WARN: error al obtener el archivo image: %v", err)
 		}
 
+		var ownerID string = "anonymous"
+		claims := middleware.ClaimsFromContext(r.Context())
+		if claims != nil {
+			ownerID = claims.UserID
+		}
+
 		// ── 2. Construir payload para el Guardián ───────────────────────────────
 		slug := database.GenerateSlug(title)
 		payload := nodeCreationPayload{
@@ -135,7 +144,7 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 			Title:       title,
 			Description: description,
 			Category:    category,
-			OwnerID:     "anonymous", // TODO: reemplazar con el user_id de la sesión JWT
+			OwnerID:     ownerID,
 			RequestedAt: time.Now().UTC().Format(time.RFC3339),
 		}
 
@@ -177,7 +186,11 @@ func CreateNodeHandler(db *sql.DB, nc *nats.Conn) http.HandlerFunc {
 		}
 
 		// ── 4b. Guardián aprueba (o sugiere alternativas pero permite continuar) ─
-		nodeID, err := database.CreateNode(db, title, description, category, imageURL)
+		var ownerIDPtr *string
+		if ownerID != "anonymous" {
+			ownerIDPtr = &ownerID
+		}
+		nodeID, err := database.CreateNode(db, title, description, category, imageURL, ownerIDPtr)
 		if err != nil {
 			log.Printf("ERROR: no se pudo crear el nodo en BD: %v", err)
 			http.Error(w, fmt.Sprintf("<div class=\"error\">Error creando nodo: %v</div>", err), http.StatusInternalServerError)
@@ -222,14 +235,21 @@ func NodeDetailHandler(db *sql.DB) http.HandlerFunc {
 		}
 
 		// Extraer el ID de la URL: /nodes/{id}
-		nodeID := strings.TrimPrefix(r.URL.Path, "/nodes/")
-		nodeID = strings.TrimSuffix(nodeID, "/")
+		nodeID := r.PathValue("id")
 		if nodeID == "" {
 			http.NotFound(w, r)
 			return
 		}
 
-		node, err := database.GetNodeByID(db, nodeID)
+		var userID *string
+		if cookie, err := r.Cookie("nodal_session"); err == nil {
+			tokenStr := strings.TrimSpace(cookie.Value)
+			if claims, err := auth.ValidateToken(tokenStr); err == nil {
+				userID = &claims.UserID
+			}
+		}
+
+		node, err := database.GetNodeByID(db, nodeID, userID)
 		if err != nil {
 			log.Printf("WARN: nodo no encontrado id=%s: %v", nodeID, err)
 			http.NotFound(w, r)
@@ -280,9 +300,7 @@ func PostChatMessageHandler(db *sql.DB, nc *nats.Conn, hub *websocket.Hub) http.
 		}
 
 		// Extraer el ID de la URL: /nodes/{id}/chat
-		path := strings.TrimPrefix(r.URL.Path, "/nodes/")
-		path = strings.TrimSuffix(path, "/chat")
-		nodeID := path
+		nodeID := r.PathValue("id")
 		if nodeID == "" {
 			http.NotFound(w, r)
 			return
@@ -300,13 +318,33 @@ func PostChatMessageHandler(db *sql.DB, nc *nats.Conn, hub *websocket.Hub) http.
 		}
 
 		// Verificar que el nodo existe
-		if _, err := database.GetNodeByID(db, nodeID); err != nil {
+		if _, err := database.GetNodeByID(db, nodeID, nil); err != nil {
 			http.NotFound(w, r)
 			return
 		}
 
-		msg, err := database.CreateChatMessage(db, nodeID, content)
+		var userID *string
+		claims := middleware.ClaimsFromContext(r.Context())
+		if claims != nil {
+			userID = &claims.UserID
+		} else {
+			if cookie, err := r.Cookie("nodal_session"); err == nil {
+				tokenStr := strings.TrimSpace(cookie.Value)
+				if cl, err := auth.ValidateToken(tokenStr); err == nil {
+					userID = &cl.UserID
+				}
+			}
+		}
+
+		parentIDStr := r.FormValue("parent_id")
+		var parentID *string
+		if parentIDStr != "" {
+			parentID = &parentIDStr
+		}
+
+		msg, err := database.CreateChatMessage(db, nodeID, content, userID, parentID)
 		if err != nil {
+			log.Printf("ERROR Guardando mensaje: %v", err)
 			log.Printf("ERROR: no se pudo insertar mensaje de chat en nodo %s: %v", nodeID, err)
 			http.Error(w, "Error interno del servidor", http.StatusInternalServerError)
 			return
@@ -355,9 +393,7 @@ var upgrader = gorilla.Upgrader{
 func WebSocketHandler(hub *websocket.Hub) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Extraer el ID de la URL: /nodes/{id}/ws
-		path := strings.TrimPrefix(r.URL.Path, "/nodes/")
-		path = strings.TrimSuffix(path, "/ws")
-		nodeID := path
+		nodeID := r.PathValue("id")
 		if nodeID == "" {
 			http.Error(w, "Node ID required", http.StatusBadRequest)
 			return
@@ -382,3 +418,207 @@ func WebSocketHandler(hub *websocket.Hub) http.HandlerFunc {
 		go client.ReadPump()
 	}
 }
+
+// NodeLikeHandler handles POST /nodes/{id}/like
+func NodeLikeHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		nodeID := r.PathValue("id")
+		if nodeID == "" {
+			http.NotFound(w, r)
+			return
+		}
+
+		claims := middleware.ClaimsFromContext(r.Context())
+		if claims == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		userID := claims.UserID
+
+		_, err := database.ToggleLike(db, userID, nodeID)
+		if err != nil {
+			log.Printf("ERROR: failed to toggle like for node %s user %s: %v", nodeID, userID, err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		// Retrieve updated node with updated like count and is_liked status
+		updatedNode, err := database.GetNodeByID(db, nodeID, &userID)
+		if err != nil {
+			log.Printf("ERROR: failed to get updated node %s: %v", nodeID, err)
+			http.NotFound(w, r)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		views.NodeCard(*updatedNode).Render(r.Context(), w)
+	}
+}
+
+// ToggleSaveHandler handles POST /nodes/{id}/save and returns ONLY the SaveButton component.
+func ToggleSaveHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		nodeID := r.PathValue("id")
+		if nodeID == "" {
+			http.NotFound(w, r)
+			return
+		}
+
+		claims := middleware.ClaimsFromContext(r.Context())
+		if claims == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		userID := claims.UserID
+
+		isSaved, err := database.ToggleSaveNode(db, userID, nodeID)
+		if err != nil {
+			log.Printf("ERROR: failed to toggle save for node %s user %s: %v", nodeID, userID, err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		views.SaveButton(nodeID, isSaved).Render(r.Context(), w)
+	}
+}
+
+// SearchHandler handles GET /search.
+// Reads "q" parameter. If empty, list all nodes. Otherwise search.
+func SearchHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		q := strings.TrimSpace(r.URL.Query().Get("q"))
+		q = strings.TrimPrefix(q, "#") // normalizar hashtags: #OnePiece → OnePiece
+		
+
+		var userID *string
+		if cookie, err := r.Cookie("nodal_session"); err == nil {
+			tokenStr := strings.TrimSpace(cookie.Value)
+			if claims, err := auth.ValidateToken(tokenStr); err == nil {
+				userID = &claims.UserID
+			}
+		}
+
+		var nodes []database.Node
+		var err error
+		if q == "" {
+			nodes, err = database.ListNodes(db, userID)
+		} else {
+			nodes, err = database.SearchNodes(db, q, userID)
+		}
+
+		if err != nil {
+			log.Printf("ERROR: search nodes failed: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if len(nodes) == 0 {
+			w.Write([]byte(`<div class="nodes-empty"><p>No se encontraron nodos. 🔍</p></div>`))
+			return
+		}
+
+		for _, n := range nodes {
+			views.NodeCard(n).Render(r.Context(), w)
+		}
+	}
+}
+
+// LeftSidebarHandler handles GET /components/sidebar/left.
+// Returns only Navigation + Top-5 trending hashtags (no categories).
+func LeftSidebarHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Extract trending hashtags from all nodes via Regex
+		nodes, err := database.ListNodes(db, nil)
+		var trends []database.Trend
+		if err == nil {
+			counts := make(map[string]int)
+			canonical := make(map[string]string)
+			tagRegexp := regexp.MustCompile(`#\w+`)
+
+			for _, node := range nodes {
+				text := node.Title + " " + node.Description
+				matches := tagRegexp.FindAllString(text, -1)
+				for _, match := range matches {
+					cleanTag := strings.TrimPrefix(match, "#")
+					lowerTag := strings.ToLower(cleanTag)
+					counts[lowerTag]++
+					if _, exists := canonical[lowerTag]; !exists {
+						canonical[lowerTag] = cleanTag
+					}
+				}
+			}
+
+			for lowerTag, count := range counts {
+				trends = append(trends, database.Trend{
+					Name:  canonical[lowerTag],
+					Count: count,
+				})
+			}
+
+			// Sort by count descending, then alphabetically
+			sort.Slice(trends, func(i, j int) bool {
+				if trends[i].Count == trends[j].Count {
+					return trends[i].Name < trends[j].Name
+				}
+				return trends[i].Count > trends[j].Count
+			})
+
+			if len(trends) > 5 {
+				trends = trends[:5]
+			}
+		} else {
+			log.Printf("WARN: failed to get nodes for trends in left sidebar: %v", err)
+		}
+
+		// Fallback mock topics if no hashtags found in DB
+		if len(trends) == 0 {
+			trends = []database.Trend{
+				{Name: "Valorant", Count: 3},
+				{Name: "Pokemon", Count: 2},
+				{Name: "OnePiece", Count: 2},
+				{Name: "IA", Count: 2},
+				{Name: "Dev", Count: 1},
+			}
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		views.LeftSidebarContent(trends).Render(r.Context(), w)
+	}
+}
+
+// RightSidebarHandler handles GET /components/sidebar/right.
+// Returns compact popular nodes list and active trending topics.
+func RightSidebarHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		popularNodes, err := database.GetPopularNodes(db, 4)
+		if err != nil {
+			log.Printf("ERROR: failed to get popular nodes: %v", err)
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Write([]byte(`<aside class="widgets-sidebar flex flex-col gap-6 w-80 flex-shrink-0 hidden lg:block"><div class="widget-box w-full"><div style="color: var(--text-muted); font-size: var(--font-size-xs); padding: var(--space-2);">Error cargando comunidades</div></div></aside>`))
+			return
+		}
+
+		trends, err := database.GetTrendingTopics(db, 4)
+		if err != nil {
+			log.Printf("WARN: failed to get trending topics for right sidebar: %v", err)
+			trends = []database.TrendingTopic{}
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		views.RightSidebarContent(popularNodes, trends).Render(r.Context(), w)
+	}
+}
+
+

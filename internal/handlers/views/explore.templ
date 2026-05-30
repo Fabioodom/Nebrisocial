@@ -1,0 +1,54 @@
+package views
+
+import (
+	"nodal/internal/platform/database"
+)
+
+templ Explore(isAuthenticated bool, username string, nodes []database.Node) {
+	@Layout(isAuthenticated, username) {
+		<div class="explore-container p-6">
+			<div class="explore-header mb-6" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-3); margin-bottom: var(--space-6);">
+				<h2 class="explore-header-title text-xl font-bold text-text-primary" style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--text-primary); margin: 0;">Explorar Nodos</h2>
+			</div>
+
+			if len(nodes) == 0 {
+				<div class="nodes-empty">
+					<p>Todavía no hay nodos para explorar. 🚀</p>
+				</div>
+			} else {
+				<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+					for _, n := range nodes {
+						@ExploreCubeItem(n)
+					}
+				</div>
+			}
+		</div>
+	}
+}
+
+templ ExploreCubeItem(n database.Node) {
+	<a href={ templ.SafeURL("/nodes/" + n.ID) } class="relative block aspect-square rounded-xl overflow-hidden group border border-border-subtle hover:border-brand-soft transition-all duration-300">
+		if n.ImageURL != nil && *n.ImageURL != "" {
+			<img src={ *n.ImageURL } class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={ n.Title } />
+		} else {
+			<!-- Fallback cover when no image is uploaded -->
+			<div class="absolute inset-0 w-full h-full bg-bg-surface flex items-center justify-center text-text-muted group-hover:scale-105 transition-transform duration-300">
+				<span class="text-3xl">🧩</span>
+			</div>
+		}
+		
+		<!-- Gradient Overlay -->
+		<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-4">
+			<span class="text-[10px] font-semibold tracking-wider text-brand-soft uppercase mb-1 bg-black/20 px-2 py-0.5 rounded-full w-max backdrop-blur-xs">
+				if n.Category != "" {
+					{ n.Category }
+				} else {
+					General
+				}
+			</span>
+			<h3 class="text-sm font-bold text-white leading-tight drop-shadow-sm group-hover:text-brand-soft transition-colors">
+				{ n.Title }
+			</h3>
+		</div>
+	</a>
+}

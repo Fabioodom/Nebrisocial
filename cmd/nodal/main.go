@@ -65,6 +65,10 @@ func main() {
 
 	// Home — ahora recibe db para listar nodos
 	mux.HandleFunc("/", handlers.HomeHandler(db))
+	mux.HandleFunc("GET /explore", handlers.ExploreHandler(db))
+	mux.HandleFunc("GET /search", handlers.SearchHandler(db))
+	mux.HandleFunc("GET /components/sidebar/left", handlers.LeftSidebarHandler(db))
+	mux.HandleFunc("GET /components/sidebar/right", handlers.RightSidebarHandler(db))
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		if err := db.Ping(); err != nil {
@@ -82,6 +86,15 @@ func main() {
 	mux.HandleFunc("/login", authHandler.ShowLogin)
 	mux.HandleFunc("/register", authHandler.ShowRegister)
 	mux.HandleFunc("/profile", handlers.ProfileHandler(db))
+	mux.HandleFunc("POST /profile/edit", handlers.EditProfileHandler(db))
+	mux.HandleFunc("POST /users/{id}/follow", handlers.FollowHandler(db))
+	mux.HandleFunc("GET /notifications", handlers.NotificationsHandler(db))
+	mux.HandleFunc("GET /notifications/all", handlers.NotificationsAllHandler(db))
+	mux.HandleFunc("POST /notifications/{id}/accept", handlers.NotificationsAcceptHandler(db))
+	mux.HandleFunc("POST /notifications/{id}/reject", handlers.NotificationsRejectHandler(db))
+	mux.HandleFunc("GET /notifications/unread-count", handlers.NotificationsUnreadCountHandler(db))
+
+
 
 
 	// API de autenticación (POST)
@@ -91,12 +104,12 @@ func main() {
 	mux.HandleFunc("/auth/logout", authHandler.Logout)
 
 	// OAuth2 — Google
-	mux.HandleFunc("/auth/google/login", authHandler.GoogleLogin)
-	mux.HandleFunc("/auth/google/callback", authHandler.GoogleCallback)
+	mux.HandleFunc("GET /auth/google/login", handlers.OAuthGoogleLogin)
+	mux.HandleFunc("GET /auth/google/callback", handlers.OAuthGoogleCallback)
 
 	// OAuth2 — GitHub
-	mux.HandleFunc("/auth/github/login", authHandler.GitHubLogin)
-	mux.HandleFunc("/auth/github/callback", authHandler.GitHubCallback)
+	mux.HandleFunc("GET /auth/github/login", handlers.OAuthGithubLogin)
+	mux.HandleFunc("GET /auth/github/callback", handlers.OAuthGithubCallback)
 
 	// ── Rutas de Nodos ────────────────────────────────────────────────────────
 	// POST /nodes — crear un nodo (protegido por RequireAuth)
@@ -112,6 +125,16 @@ func main() {
 
 	// GET /nodes/{id}/ws — WebSocket de tiempo real
 	mux.HandleFunc("GET /nodes/{id}/ws", handlers.WebSocketHandler(hub))
+
+	// POST /nodes/{id}/like — dar/quitar like a un nodo (protegido por RequireAuth)
+	mux.Handle("POST /nodes/{id}/like", middleware.RequireAuth(
+		http.HandlerFunc(handlers.NodeLikeHandler(db)),
+	))
+
+	// POST /nodes/{id}/save — guardar/quitar guardado de un nodo (protegido por RequireAuth)
+	mux.Handle("POST /nodes/{id}/save", middleware.RequireAuth(
+		http.HandlerFunc(handlers.ToggleSaveHandler(db)),
+	))
 
 	// ── Rutas de Administración / Auditoría ──────────────────────────────────
 	mux.HandleFunc("/admin/audit", handlers.AuditHandler(db))
