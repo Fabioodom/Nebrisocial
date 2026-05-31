@@ -93,14 +93,20 @@ func ExploreHandler(db *sql.DB) http.HandlerFunc {
 		q := strings.TrimSpace(r.URL.Query().Get("q"))
 		q = strings.TrimPrefix(q, "#") // normalizar hashtags: #OnePiece → OnePiece
 		var nodes []database.Node
+		var users []database.User
 		var err error
 
 		if q != "" {
 			nodes, err = database.SearchNodes(db, q, userID)
-
 			if err != nil {
 				log.Printf("WARN: no se pudo buscar nodos para explorar con query %q: %v", q, err)
 				nodes = nil
+			}
+
+			users, err = database.SearchUsers(db, q)
+			if err != nil {
+				log.Printf("WARN: no se pudo buscar usuarios para explorar con query %q: %v", q, err)
+				users = nil
 			}
 		} else {
 			nodes, err = database.ListNodes(db, userID)
@@ -110,8 +116,9 @@ func ExploreHandler(db *sql.DB) http.HandlerFunc {
 			}
 		}
 
+		log.Printf("Búsqueda global ['%s'] -> Nodos: %d | Usuarios: %d\n", q, len(nodes), len(users))
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		views.Explore(isAuthenticated, username, nodes).Render(r.Context(), w)
+		views.Explore(isAuthenticated, username, nodes, users, q).Render(r.Context(), w)
 	}
 }
 

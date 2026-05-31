@@ -606,7 +606,7 @@ func RightSidebarHandler(db *sql.DB) http.HandlerFunc {
 		if err != nil {
 			log.Printf("ERROR: failed to get popular nodes: %v", err)
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.Write([]byte(`<aside class="widgets-sidebar flex flex-col gap-6 w-80 flex-shrink-0 hidden lg:block"><div class="widget-box w-full"><div style="color: var(--text-muted); font-size: var(--font-size-xs); padding: var(--space-2);">Error cargando comunidades</div></div></aside>`))
+			w.Write([]byte(`<aside class="widgets-sidebar flex flex-col gap-6 w-80 flex-shrink-0 hidden lg:flex"><div class="widget-box w-full"><div style="color: var(--text-muted); font-size: var(--font-size-xs); padding: var(--space-2);">Error cargando comunidades</div></div></aside>`))
 			return
 		}
 

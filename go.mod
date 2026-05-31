@@ -16,6 +16,7 @@ require (
 
 require (
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
+	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/nats-io/nkeys v0.4.15 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
