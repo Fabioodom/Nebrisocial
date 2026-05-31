@@ -580,5 +580,44 @@ func RejectFollowRequestByID(db *sql.DB, notificationID, userID string) error {
 	return RejectFollowRequest(db, followerID, userID)
 }
 
+// SearchUsers busca usuarios cuyo nombre de usuario o biografía coincida con la consulta (ignorando espacios y distinguiendo mayúsculas/minúsculas).
+func SearchUsers(db *sql.DB, query string) ([]User, error) {
+	const sqlQuery = `
+		SELECT id, username, COALESCE(avatar_url, ''), COALESCE(bio, '')
+		FROM users
+		WHERE REPLACE(username, ' ', '') ILIKE '%' || REPLACE($1, ' ', '') || '%'
+		   OR REPLACE(COALESCE(bio, ''), ' ', '') ILIKE '%' || REPLACE($1, ' ', '') || '%'
+		ORDER BY username ASC
+	`
 
+	rows, err := db.Query(sqlQuery, query)
+	if err != nil {
+		return nil, fmt.Errorf("user_repo: error al buscar usuarios: %w", err)
+	}
+	defer rows.Close()
+
+	var list []User
+	for rows.Next() {
+		var u User
+		var avatarURL, bio string
+		err = rows.Scan(
+			&u.ID,
+			&u.Username,
+			&avatarURL,
+			&bio,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("user_repo: error al escanear usuario: %w", err)
+		}
+		u.AvatarURL = &avatarURL
+		u.Bio = &bio
+		list = append(list, u)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("user_repo: error iterando filas de usuarios: %w", err)
+	}
+
+	return list, nil
+}
 

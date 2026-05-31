@@ -102,10 +102,12 @@ templ NavBar(isAuthenticated bool, username string) {
 				class="navbar-search-input"
 				type="search"
 				name="q"
-				placeholder="Buscar Nodos..."
-				hx-get="/search"
+				placeholder="Buscar en Nodal..."
+				hx-get="/explore"
 				hx-trigger="keyup changed delay:500ms, search"
-				hx-target="#main-feed"
+				hx-target=".main-content"
+				hx-select=".explore-container"
+				hx-push-url="true"
 				autocomplete="off"
 			/>
 			<kbd class="navbar-search-kbd">Ctrl K</kbd>
@@ -290,8 +292,33 @@ templ ThemeInitScript() {
 				sidebar.classList.toggle('mobile-open');
 			}
 		}
-		document.addEventListener('DOMContentLoaded', updateThemeIcons);
-		document.addEventListener('htmx:afterSwap', updateThemeIcons);
+		function syncSearchBar() {
+			var searchInput = document.getElementById('navbar-node-search');
+			if (!searchInput) return;
+			var params = new URLSearchParams(window.location.search);
+			var q = params.get('q') || '';
+			if (document.activeElement !== searchInput) {
+				searchInput.value = q;
+			}
+		}
+		document.addEventListener('DOMContentLoaded', function() {
+			updateThemeIcons();
+			syncSearchBar();
+		});
+		document.addEventListener('htmx:afterSwap', function() {
+			updateThemeIcons();
+			syncSearchBar();
+		});
+		document.addEventListener('keydown', function(e) {
+			if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+				var searchInput = document.getElementById('navbar-node-search');
+				if (searchInput) {
+					e.preventDefault();
+					searchInput.focus();
+					searchInput.select();
+				}
+			}
+		});
 	</script>
 }
 

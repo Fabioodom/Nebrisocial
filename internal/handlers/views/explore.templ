@@ -2,26 +2,91 @@ package views
 
 import (
 	"nodal/internal/platform/database"
+	"strings"
 )
 
-templ Explore(isAuthenticated bool, username string, nodes []database.Node) {
+templ Explore(isAuthenticated bool, username string, nodes []database.Node, users []database.User, searchQuery string) {
 	@Layout(isAuthenticated, username) {
 		<div class="explore-container p-6">
 			<div class="explore-header mb-6" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-3); margin-bottom: var(--space-6);">
-				<h2 class="explore-header-title text-xl font-bold text-text-primary" style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--text-primary); margin: 0;">Explorar Nodos</h2>
+				<h2 class="explore-header-title text-xl font-bold text-text-primary" style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--text-primary); margin: 0;">Buscador Global</h2>
 			</div>
 
-			if len(nodes) == 0 {
-				<div class="nodes-empty">
-					<p>Todavía no hay nodos para explorar. 🚀</p>
-				</div>
-			} else {
-				<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-					for _, n := range nodes {
-						@ExploreCubeItem(n)
+			<!-- Sección de Usuarios -->
+			if searchQuery != "" {
+				<div class="users-section mb-8" style="margin-bottom: var(--space-8);">
+					<h2 class="text-xl font-bold mb-4 text-text-primary" style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--text-primary); margin-bottom: var(--space-4);">👥 Usuarios Encontrados</h2>
+					if len(users) > 0 {
+						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4);">
+							for _, u := range users {
+								<a href={ templ.SafeURL("/profile/" + u.Username) } class="user-search-card" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-3); display: flex; align-items: center; gap: var(--space-3); text-decoration: none; transition: all 0.2s ease;" onmouseover="this.style.borderColor='var(--brand-soft)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.borderColor='var(--border-subtle)'; this.style.transform='none';">
+									<div class="user-search-avatar" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--brand-soft); color: var(--brand-color); border: 1px solid var(--border-subtle); flex-shrink: 0;">
+										if u.AvatarURL != nil && *u.AvatarURL != "" {
+											<img src={ *u.AvatarURL } class="w-full h-full object-cover" alt={ u.Username } />
+										} else {
+											<span class="font-bold" style="font-size: var(--font-size-md); font-weight: var(--font-weight-bold);">
+												if len(u.Username) > 0 {
+													{ strings.ToUpper(string([]rune(u.Username)[0])) }
+												} else {
+													U
+												}
+											</span>
+										}
+									</div>
+									<div class="user-search-info" style="display: flex; flex-direction: column; min-width: 0; flex: 1;">
+										<span class="font-semibold text-text-primary text-sm truncate" style="font-weight: var(--font-weight-semibold); color: var(--text-primary); font-size: var(--font-size-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+											{ "@" + u.Username }
+										</span>
+										if u.Bio != nil && *u.Bio != "" {
+											<span class="text-text-muted text-xs truncate" style="color: var(--text-muted); font-size: var(--font-size-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+												{ *u.Bio }
+											</span>
+										} else {
+											<span class="text-text-muted text-xs italic truncate" style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+												Sin biografía
+											</span>
+										}
+									</div>
+								</a>
+							}
+						</div>
+					} else {
+						<div class="p-8 text-center text-gray-400 bg-gray-800/50 rounded-xl border border-gray-700">
+							<p>No se han encontrado usuarios con ese término. 😢</p>
+						</div>
 					}
 				</div>
 			}
+
+			<!-- Sección de Nodos -->
+			<div class="nodes-section">
+				if searchQuery != "" {
+					<h2 class="text-xl font-bold mb-4 mt-8 text-text-primary" style="font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--text-primary); margin-top: var(--space-8); margin-bottom: var(--space-4);">📦 Nodos Encontrados</h2>
+					if len(nodes) > 0 {
+						<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+							for _, n := range nodes {
+								@ExploreCubeItem(n)
+							}
+						</div>
+					} else {
+						<div class="nodes-empty" style="padding: var(--space-6); text-align: center; border: 1px dashed var(--border-subtle); border-radius: var(--radius-lg); color: var(--text-muted);">
+							<p>No se encontraron nodos. 🚀</p>
+						</div>
+					}
+				} else {
+					if len(nodes) > 0 {
+						<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+							for _, n := range nodes {
+								@ExploreCubeItem(n)
+							}
+						</div>
+					} else {
+						<div class="nodes-empty" style="padding: var(--space-6); text-align: center; border: 1px dashed var(--border-subtle); border-radius: var(--radius-lg); color: var(--text-muted);">
+							<p>Empieza a buscar comunidades y usuarios en la barra superior. 🚀</p>
+						</div>
+					}
+				}
+			</div>
 		</div>
 	}
 }

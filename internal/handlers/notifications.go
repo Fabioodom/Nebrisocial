@@ -182,7 +182,7 @@ func NotificationsUnreadCountHandler(db *sql.DB) http.HandlerFunc {
 			if unreadCount > 99 {
 				countStr = "99+"
 			}
-			fmt.Fprintf(w, `<span id="notif-badge" class="notif-badge" style="position: absolute; top: -4px; right: -4px; background: var(--brand-color); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid var(--bg-surface);">%s</span>`, countStr)
+			fmt.Fprintf(w, `<span id="notif-badge" class="notif-badge" style="position: absolute; top: -4px; right: -4px; background: var(--brand-color); color: white; border-radius: 50%%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid var(--bg-surface);">%s</span>`, countStr)
 		} else {
 			w.Write([]byte(`<span id="notif-badge"></span>`))
 		}
