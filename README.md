@@ -6,7 +6,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![HTMX](https://img.shields.io/badge/HTMX-SPA%20SSR-3D5F7F?style=for-the-badge&logo=htmx&logoColor=white)](https://htmx.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-v4.0-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Docker](https://img.shields.io/badge/Docker-Infrastructure-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Docker](https://img.shields.io/badge/Docker-Infrastructure-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/) 
 
 **Nodal** es una red social de alta disponibilidad diseñada bajo la filosofía **"Topic-First"**. Su objetivo es conectar a las personas en torno a sus intereses y pasiones (organizados en comunidades denominadas **Nodos**) en lugar de centrarse en perfiles individuales. Toda la plataforma está impulsada y dinamizada por un ecosistema multi-agente de Inteligencia Artificial que automatiza la gobernanza, la moderación semántica, el enriquecimiento contextual y la síntesis de información en tiempo real.
 
