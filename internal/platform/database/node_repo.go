@@ -516,6 +516,7 @@ func SearchNodes(db *sql.DB, queryStr string, userID *string) ([]Node, error) {
 	          WHERE REPLACE(n.title, ' ', '') ILIKE '%' || REPLACE($1, ' ', '') || '%'
 	             OR REPLACE(n.description, ' ', '') ILIKE '%' || REPLACE($1, ' ', '') || '%'
 	             OR REPLACE(n.category, ' ', '') ILIKE '%' || REPLACE($1, ' ', '') || '%'
+	             OR REPLACE(n.metadata::text, ' ', '') ILIKE '%' || REPLACE($1, ' ', '') || '%'
 	          ORDER BY n.created_at DESC`
 
 
