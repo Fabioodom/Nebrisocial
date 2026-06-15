@@ -78,7 +78,7 @@ class CuratorAgent:
         self.repo = repo
 
     async def curate(
-        self, node_id: str, title: str, category: str
+        self, node_id: str, title: str, category: str, slug: str | None = None
     ) -> None:
         """
         Flujo principal de curación: enriquece los metadatos de un nodo.
@@ -87,6 +87,7 @@ class CuratorAgent:
             node_id: UUID del nodo recién creado.
             title: Título del nodo (usado como argumento para las tools).
             category: Categoría del nodo (normalizada a minúsculas internamente).
+            slug: Slug del nodo opcional (usado para detectar trazas de pokémon).
 
         Raises:
             No lanza excepciones hacia afuera — todos los errores se capturan y
@@ -94,15 +95,32 @@ class CuratorAgent:
         """
         normalized_category = category.lower().strip()
         log.info(
-            "CuratorAgent.curate iniciado — node_id=%s, category='%s'",
+            "CuratorAgent.curate iniciado — node_id=%s, category='%s', slug=%s",
             node_id,
             normalized_category,
+            slug,
         )
 
         # ── Paso 1: Determinar tools relevantes ───────────────────────────────
-        tool_names: list[str] = self.settings.category_to_tools.get(
-            normalized_category, []
-        )
+        title_lower = title.lower()
+        slug_lower = slug.lower() if slug else ""
+
+        if normalized_category == "pokemon":
+            tool_names = ["pokemon_metadata"]
+        elif (
+            "pokemon" in normalized_category
+            or "pokémon" in normalized_category
+            or "pokemon" in title_lower
+            or "pokémon" in title_lower
+            or "pokemon" in slug_lower
+            or "pokémon" in slug_lower
+        ):
+            tool_names = ["pokemon_metadata"]
+            log.info("Trazas de Pokémon detectadas en categoría, título o slug. Usando pokemon_metadata.")
+        else:
+            tool_names = self.settings.category_to_tools.get(
+                normalized_category, []
+            )
 
         if not tool_names:
             log.warning(

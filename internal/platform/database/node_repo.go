@@ -683,6 +683,10 @@ func mapCategoryToTrend(category string, count int) TrendingTopic {
 		topic.Emoji = "🎮"
 		topic.Title = "Gaming Week"
 		topic.Subtitle = fmt.Sprintf("¡%d nuevas interacciones sobre eSports y torneos!", count)
+	case "pokemon":
+		topic.Emoji = "🦖"
+		topic.Title = "Pokémon Hub"
+		topic.Subtitle = fmt.Sprintf("¡%d entrenadores buscando metadatos y discutiendo hoy!", count)
 	case "anime", "manga":
 		topic.Emoji = "⛩️"
 		topic.Title = "Manga Drops"

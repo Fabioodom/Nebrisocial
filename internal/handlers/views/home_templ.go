@@ -55,7 +55,7 @@ func Home(isAuthenticated bool, username string, nodes []database.Node) templ.Co
 				return templ_7745c5c3_Err
 			}
 			if isAuthenticated {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- Formulario de creación de Nodo Estilo Reddit --> <div class=\"create-node-box\" id=\"create-node-box\"><!-- Falso input (Colapsado por defecto) --><div class=\"fake-input-box\" onclick=\"document.getElementById('create-node-box').classList.add('expanded')\"><span class=\"fake-input-avatar\">👤</span><div class=\"fake-input-placeholder\">Crear nueva comunidad o hilo...</div></div><!-- Formulario Real (Oculto hasta expandirse) --><div class=\"real-form-box\"><div class=\"form-header\"><h3 class=\"form-title\">Crear nueva comunidad</h3><button type=\"button\" class=\"btn-close-compact\" onclick=\"event.stopPropagation(); document.getElementById('create-node-box').classList.remove('expanded')\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line> <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg></button></div><form hx-post=\"/nodes\" hx-target=\"#form-result\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) { this.reset(); setTimeout(()=>window.location.reload(), 1200); }\" enctype=\"multipart/form-data\" class=\"node-form\"><div class=\"form-group\"><label for=\"node-title\">Nombre del Nodo</label> <input type=\"text\" id=\"node-title\" name=\"title\" placeholder=\"p. ej. Manga & Anime\" required></div><div class=\"form-group\"><label for=\"node-category\">Categoría</label> <select id=\"node-category\" name=\"category\"><option value=\"manga\">⛩️ Manga & Anime</option> <option value=\"ia\">🤖 IA & RAG</option> <option value=\"gaming\">🎮 Gaming</option> <option value=\"desarrollo\">🐹 Desarrollo & Diseño</option></select></div><div class=\"form-group\"><label for=\"node-description\">Descripción</label> <textarea id=\"node-description\" name=\"description\" placeholder=\"¿De qué trata esta comunidad?...\" rows=\"3\"></textarea></div><div class=\"form-group\"><label for=\"node-image\">Imagen de Portada</label> <input type=\"file\" id=\"node-image\" name=\"image\" accept=\"image/*\" class=\"w-full bg-bg-elevated border border-border-subtle rounded-md p-2 text-text-primary text-sm\"></div><div class=\"form-actions-row\"><button type=\"button\" class=\"btn-secondary\" onclick=\"document.getElementById('create-node-box').classList.remove('expanded')\">Cancelar</button> <button type=\"submit\" class=\"btn-primary\">Crear Nodo</button></div></form><div id=\"form-result\"></div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- Formulario de creación de Nodo Estilo Reddit --> <div class=\"create-node-box\" id=\"create-node-box\"><!-- Falso input (Colapsado por defecto) --><div class=\"fake-input-box\" onclick=\"document.getElementById('create-node-box').classList.add('expanded')\"><span class=\"fake-input-avatar\">👤</span><div class=\"fake-input-placeholder\">Crear nueva comunidad o hilo...</div></div><!-- Formulario Real (Oculto hasta expandirse) --><div class=\"real-form-box\"><div class=\"form-header\"><h3 class=\"form-title\">Crear nueva comunidad</h3><button type=\"button\" class=\"btn-close-compact\" onclick=\"event.stopPropagation(); document.getElementById('create-node-box').classList.remove('expanded')\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line> <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg></button></div><form hx-post=\"/nodes\" hx-target=\"#form-result\" hx-swap=\"innerHTML\" hx-on::after-request=\"if(event.detail.successful) { this.reset(); setTimeout(()=>window.location.reload(), 1200); }\" enctype=\"multipart/form-data\" class=\"node-form\"><div class=\"form-group\"><label for=\"node-title\">Nombre del Nodo</label> <input type=\"text\" id=\"node-title\" name=\"title\" placeholder=\"p. ej. Manga & Anime\" required></div><div class=\"form-group\"><label for=\"node-category\">Categoría</label> <select id=\"node-category\" name=\"category\"><option value=\"manga\">⛩️ Manga & Anime</option> <option value=\"ia\">🤖 IA & RAG</option> <option value=\"gaming\">🎮 Gaming</option> <option value=\"desarrollo\">🐹 Desarrollo & Diseño</option> <option value=\"pokemon\">🦖 Pokémon</option></select></div><div class=\"form-group\"><label for=\"node-description\">Descripción</label> <textarea id=\"node-description\" name=\"description\" placeholder=\"¿De qué trata esta comunidad?...\" rows=\"3\"></textarea></div><div class=\"form-group\"><label for=\"node-image\">Imagen de Portada</label> <input type=\"file\" id=\"node-image\" name=\"image\" accept=\"image/*\" class=\"w-full bg-bg-elevated border border-border-subtle rounded-md p-2 text-text-primary text-sm\"></div><div class=\"form-actions-row\"><button type=\"button\" class=\"btn-secondary\" onclick=\"document.getElementById('create-node-box').classList.remove('expanded')\">Cancelar</button> <button type=\"submit\" class=\"btn-primary\">Crear Nodo</button></div></form><div id=\"form-result\"></div></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -117,7 +117,7 @@ func NodeGrid(nodes []database.Node) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(nodes)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 101, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 102, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -190,7 +190,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var6 templ.SafeURL
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/profile?username=" + n.Username))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 127, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 128, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -211,7 +211,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(n.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 129, Col: 226}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 130, Col: 226}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -224,7 +224,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(TimeAgo(n.CreatedAt))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 132, Col: 140}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 133, Col: 140}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -260,7 +260,7 @@ func NodeCard(n database.Node) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(n.Category)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 135, Col: 108}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 136, Col: 108}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -283,7 +283,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var12 templ.SafeURL
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/nodes/" + n.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 142, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 143, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -296,7 +296,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(n.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 143, Col: 158}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 144, Col: 158}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -314,7 +314,7 @@ func NodeCard(n database.Node) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(n.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 148, Col: 169}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 149, Col: 169}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -337,7 +337,7 @@ func NodeCard(n database.Node) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(*n.ImageURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 153, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 154, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 			if templ_7745c5c3_Err != nil {
@@ -355,7 +355,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue("/nodes/" + n.ID + "/like")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 162, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 163, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 		if templ_7745c5c3_Err != nil {
@@ -383,7 +383,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", n.LikesCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 171, Col: 135}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 172, Col: 135}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -396,7 +396,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var18 templ.SafeURL
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/nodes/" + n.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 175, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 176, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -434,7 +434,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue("share-icon-" + n.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 189, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 190, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 		if templ_7745c5c3_Err != nil {
@@ -447,7 +447,7 @@ func NodeCard(n database.Node) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue("share-label-" + n.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 190, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 191, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 		if templ_7745c5c3_Err != nil {
@@ -569,7 +569,7 @@ func Avatar(initial string) templ.Component {
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(initial)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 287, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 288, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -612,7 +612,7 @@ func SaveButton(nodeID string, isSaved bool) templ.Component {
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.ResolveAttributeValue("/nodes/" + nodeID + "/save")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 296, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/handlers/views/home.templ`, Line: 297, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
 		if templ_7745c5c3_Err != nil {

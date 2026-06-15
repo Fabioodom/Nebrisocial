@@ -153,6 +153,8 @@ templ TrendIcon(name string) {
 			<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/><path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z"/><path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z"/></svg>
 		case "ia":
 			<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/><path d="M20 9h3"/><path d="M20 15h3"/><path d="M1 9h3"/><path d="M1 15h3"/></svg>
+		case "pokemon":
+			<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
 		default:
 			<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg>
 	}
@@ -161,7 +163,10 @@ templ TrendIcon(name string) {
 // getIconType retorna la categoría temática de la tendencia.
 func getIconType(name string) string {
 	nameLower := strings.ToLower(name)
-	if strings.Contains(nameLower, "valorant") || strings.Contains(nameLower, "pokemon") || strings.Contains(nameLower, "gaming") || strings.Contains(nameLower, "lol") {
+	if strings.Contains(nameLower, "pokemon") {
+		return "pokemon"
+	}
+	if strings.Contains(nameLower, "valorant") || strings.Contains(nameLower, "gaming") || strings.Contains(nameLower, "lol") {
 		return "gaming"
 	}
 	if strings.Contains(nameLower, "manga") || strings.Contains(nameLower, "anime") || strings.Contains(nameLower, "onepiece") || strings.Contains(nameLower, "naruto") {

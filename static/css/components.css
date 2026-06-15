@@ -619,6 +619,12 @@
     color: #34d399 !important;
 }
 
+.category-pokemon {
+    background: rgba(239, 68, 68, 0.12) !important;
+    border-color: rgba(239, 68, 68, 0.25) !important;
+    color: #f87171 !important;
+}
+
 .category-desarrollo,
 .category-prog {
     background: rgba(245, 158, 11, 0.12) !important;

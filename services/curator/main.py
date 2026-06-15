@@ -73,6 +73,7 @@ async def run_nats_subscriber(agent: CuratorAgent) -> None:
         node_id: str | None = payload.get("node_id")
         title: str | None = payload.get("title")
         category: str | None = payload.get("category")
+        slug: str | None = payload.get("slug")
 
         if not node_id or not title or not category:
             log.error(
@@ -83,7 +84,7 @@ async def run_nats_subscriber(agent: CuratorAgent) -> None:
 
         # PRD R4: si curate() falla, el nodo se crea sin metadatos.
         try:
-            await agent.curate(node_id=node_id, title=title, category=category)
+            await agent.curate(node_id=node_id, title=title, category=category, slug=slug)
         except Exception as exc:  # noqa: BLE001
             log.error(
                 "curate() falló para node_id=%s: %s — el nodo se mantiene sin metadatos.",
